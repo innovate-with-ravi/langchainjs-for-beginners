@@ -97,6 +97,9 @@ You'll need access to an AI provider. We recommend:
 
 ## Additional Resources 
 
+### Spring AI
+[![Spring AI for Beginners](https://img.shields.io/badge/Spring%20AI%20for%20Beginners-22C55E?style=for-the-badge&labelColor=E5E7EB&color=22C55E)](https://aka.ms/Spring-AI-for-Beginners)
+
 ### LangChain
 
 [![LangChain4j for Beginners](https://img.shields.io/badge/LangChain4j%20for%20Beginners-22C55E?style=for-the-badge&&labelColor=E5E7EB&color=0553D6)](https://aka.ms/langchain4j-for-beginners)
