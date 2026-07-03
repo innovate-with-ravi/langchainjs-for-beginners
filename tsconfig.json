@@ -10,6 +10,6 @@
     "outDir": "./dist",
     "rootDir": "."
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "ownUseData/Lesson1/01_.js"],
   "exclude": ["node_modules", "dist"]
 }
