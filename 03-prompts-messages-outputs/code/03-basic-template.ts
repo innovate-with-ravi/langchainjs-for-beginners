@@ -24,14 +24,15 @@ async function main() {
   const template = ChatPromptTemplate.fromMessages([
     [
       "system",
-      "You are a helpful assistant that translates {input_language} to {output_language}.",
+      "You are a helpful assistant that translates {input_language} to {output_language} in a formal way.",
     ],
     ["human", "{text}"],
   ]);
 
   console.log("Template created with variables: input_language, output_language, text\n");
+  // console.log(template); // an object of ChatPromptTemplate class{}
 
-  // Create a chain by piping template to model
+  // Create a {{chain by piping template to model}}
   const chain = template.pipe(model);
 
   // Example 1: English to French

@@ -17,6 +17,7 @@ import { createAgent, HumanMessage } from "langchain";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import "dotenv/config";
+import { ChatGroq } from "@langchain/groq";
 
 // Get the directory of this file for resolving server path
 const __filename = fileURLToPath(import.meta.url);
@@ -29,8 +30,8 @@ const mcpClient = new MultiServerMCPClient({
   localCalculator: {
     transport: "stdio",
     command: "npx",
-    args: ["tsx", join(__dirname, "servers/stdio-calculator-server.ts")]
-  }
+    args: ["tsx", join(__dirname, "servers/stdio-calculator-server.ts")],
+  },
 });
 
 try {
@@ -39,22 +40,21 @@ try {
   const tools = await mcpClient.getTools();
 
   console.log(`✅ Connected! Retrieved ${tools.length} tools from local server:`);
-  tools.forEach(tool => {
+  tools.forEach((tool) => {
     console.log(`   • ${tool.name}: ${tool.description}`);
   });
   console.log();
 
   // 2. Create model
-  const model = new ChatOpenAI({
-    model: process.env.AI_MODEL,
-    configuration: { baseURL: process.env.AI_ENDPOINT },
-    apiKey: process.env.AI_API_KEY
+  const model = new ChatGroq({
+    model: process.env.GROQ_AI_MODEL!,
+    apiKey: process.env.GROQ_API_KEY,
   });
 
   // 3. Create agent with stdio MCP tools
   const agent = createAgent({
     model,
-    tools
+    tools,
   });
 
   // 4. Test calculations
@@ -64,7 +64,7 @@ try {
   console.log(`👤 User: ${mathQuery}`);
 
   const mathResponse = await agent.invoke({
-    messages: [new HumanMessage(mathQuery)]
+    messages: [new HumanMessage(mathQuery)],
   });
   const mathResult = mathResponse.messages[mathResponse.messages.length - 1];
   console.log(`🤖 Agent: ${mathResult.content}\n`);
@@ -76,7 +76,7 @@ try {
   console.log(`👤 User: ${tempQuery}`);
 
   const tempResponse = await agent.invoke({
-    messages: [new HumanMessage(tempQuery)]
+    messages: [new HumanMessage(tempQuery)],
   });
   const tempResult = tempResponse.messages[tempResponse.messages.length - 1];
   console.log(`🤖 Agent: ${tempResult.content}\n`);
@@ -88,7 +88,7 @@ try {
   console.log(`👤 User: ${complexQuery}`);
 
   const complexResponse = await agent.invoke({
-    messages: [new HumanMessage(complexQuery)]
+    messages: [new HumanMessage(complexQuery)],
   });
   const complexResult = complexResponse.messages[complexResponse.messages.length - 1];
   console.log(`🤖 Agent: ${complexResult.content}\n`);
@@ -105,7 +105,6 @@ try {
   console.log("   stdio:  Process communication via stdin/stdout");
   console.log("   HTTP:   Network communication via HTTP requests");
   console.log("   Choose based on your architecture needs!");
-
 } catch (error) {
   console.error("❌ Error with stdio MCP server:", error);
 } finally {

@@ -3,7 +3,7 @@
  * Run: npx tsx 02-chat-models/code/03-parameters.ts
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
- * - "What temperature value should I use for a customer service chatbot?"
+ * - "What temperature value should I use for a customer service chatbot?"  -- 0 to give deterministic (same) responses
  * - "How do I add the maxTokens parameter to limit response length?"
  */
 
@@ -38,9 +38,7 @@ async function temperatureComparison() {
     } catch (error: any) {
       // Some models (like gpt-5-mini) may not support certain temperature values
       if (error.code === "unsupported_value" && error.param === "temperature") {
-        console.log(
-          `  ⚠️  This model doesn't support temperature=${temp}. Skipping...`
-        );
+        console.log(`  ⚠️  This model doesn't support temperature=${temp}. Skipping...`);
         console.log(`  💡 Error: ${error.message}`);
       } else {
         // Re-throw unexpected errors
@@ -53,12 +51,8 @@ async function temperatureComparison() {
   console.log("   - Lower values (0-0.3): More deterministic, consistent responses");
   console.log("   - Medium values (0.7-1.0): Balanced creativity and consistency");
   console.log("   - Higher values (1.5-2.0): More creative and varied responses");
-  console.log(
-    "\n⚠️  Note: Model support varies - some models only support specific values"
-  );
-  console.log(
-    "   For example, gpt-5-mini only supports temperature=1 (default)"
-  );
+  console.log("\n⚠️  Note: Model support varies - some models only support specific values");
+  console.log("   For example, gpt-5-mini only supports temperature=1 (default)");
 }
 
 async function maxTokensExample() {
@@ -87,9 +81,7 @@ async function maxTokensExample() {
       console.log(`\n(Character count: ${response.content.toString().length})`);
     } catch (error: any) {
       if (error.code === "unsupported_value") {
-        console.log(
-          `  ⚠️  This model doesn't support maxTokens=${maxTokens}. Skipping...`
-        );
+        console.log(`  ⚠️  This model doesn't support maxTokens=${maxTokens}. Skipping...`);
         console.log(`  💡 Error: ${error.message}`);
       } else {
         throw error;

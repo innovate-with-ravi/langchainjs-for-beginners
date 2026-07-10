@@ -1,3 +1,5 @@
+//HITL: needs knowledge of langGraph+Redis(checkpointer) & Commands(to handle workflow on human interaction)
+
 import {
   createAgent,
   createMiddleware,
@@ -5,27 +7,12 @@ import {
   HumanMessage,
   SystemMessage,
   tool,
+  type BaseMessage,
 } from "langchain";
 import { ChatOpenAI } from "@langchain/openai";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import * as z from "zod";
 import "dotenv/config";
 
-/**
- * Example 4: Built-in Middleware - summarizationMiddleware
- *
- * Demonstrates how summarizationMiddleware automatically summarizes
- * long conversations to stay within context limits and reduce token costs.
- *
- * Configuration:
- * - trigger: [{ tokens: N }, { messages: M }] - OR logic (either triggers)
- * - trigger: { tokens: N, messages: M } - AND logic (both required)
- * - keep: { messages: N } - Messages to preserve after summarization
- *
- * Run: npx tsx 05-agents/code/04-builtin-middleware.ts
- */
-
-// Simulated knowledge base - provides verbose responses to trigger summarization
 const knowledgeBase: Record<string, string> = {
   superposition: `Superposition means a quantum system can exist in multiple states simultaneously until measured. Like Schrödinger's cat being both alive and dead until observed. This principle enables qubits to represent 0 and 1 at the same time, making quantum computing powerful.`,
 
@@ -57,28 +44,11 @@ async function main() {
   console.log("📚 Built-in Middleware: summarizationMiddleware Demo\n");
   console.log("Shows how conversations are automatically condensed.\n");
 
-  if (process.env.AI_API_KEY && process.env.AI_ENDPOINT && process.env.AI_MODEL) {
-    console.log(`Using configured provider: ${process.env.AI_ENDPOINT}\n`);
-  } else if (process.env.GOOGLE_API_KEY) {
-    console.log("Using Google Gemini from GOOGLE_API_KEY\n");
-  } else {
-    console.error(
-      "No AI credentials found. Set AI_API_KEY + AI_ENDPOINT + AI_MODEL, or GOOGLE_API_KEY, before running this example."
-    );
-    process.exit(1);
-  }
-
-  const model =
-    process.env.AI_API_KEY && process.env.AI_ENDPOINT && process.env.AI_MODEL
-      ? new ChatOpenAI({
-          model: process.env.AI_MODEL,
-          configuration: { baseURL: process.env.AI_ENDPOINT },
-          apiKey: process.env.AI_API_KEY,
-        })
-      : new ChatGoogleGenerativeAI({
-          model: "gemini-2.5-flash",
-          apiKey: process.env.GOOGLE_API_KEY,
-        });
+  const model = new ChatOpenAI({
+    model: process.env.AI_MODEL,
+    configuration: { baseURL: process.env.AI_ENDPOINT },
+    apiKey: process.env.AI_API_KEY,
+  });
 
   // State tracking using state object
   const state = {
@@ -134,11 +104,13 @@ async function main() {
     ],
   });
 
-  // Fewer questions keep the demo within provider quotas and make the output easier to follow.
   const questions = [
     "What is quantum superposition?",
     "How does entanglement work?",
     "Explain quantum tunneling",
+    "What are some practical applications?",
+    "How do superposition and entanglement connect?",
+    "What role does tunneling play in electronics?",
     "Summarize the key concepts we discussed",
   ];
 
@@ -149,7 +121,7 @@ async function main() {
     "You are a quantum physics research assistant. Always use the research tool to provide accurate, detailed explanations. Keep your final responses concise."
   );
   // convxn history
-  const messages: (SystemMessage | HumanMessage)[] = [systemMessage];
+  let messages: BaseMessage[] = [systemMessage];
 
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
@@ -157,7 +129,10 @@ async function main() {
     console.log(`👤 User: ${question}\n`);
 
     messages.push(new HumanMessage(question));
-    const response = await agent.invoke({ messages: [...messages] });
+
+    const response = await agent.invoke({ messages: messages });
+
+    messages = response.messages;
 
     // Log state
     console.log(
@@ -185,7 +160,7 @@ async function main() {
     console.log(`\n🤖 Assistant: ${display}`);
     console.log("\n" + "─".repeat(70));
 
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 300));
   }
 
   console.log("\n💡 Key Takeaways:");
@@ -195,23 +170,3 @@ async function main() {
 }
 
 main().catch(console.error);
-
-/*
-Configuration options:
-
-trigger (object | object[]) - When to summarize:
-
-Single object: ALL properties must be met (AND logic)
-{ tokens: 1000, messages: 8 } - Summarize when tokens > 1000 AND messages > 8
-
-Array of objects: ANY condition triggers (OR logic)
-[{ tokens: 2000 }, { messages: 10 }] - Summarize when tokens > 2000 OR messages > 10
-
-Properties: tokens, messages, or fraction (0-1 of context window)
-
-keep - What to preserve ({{specify exactly ONE}}):
-{ messages: N } - Keep N recent messages (<<must preserve tool call chains>>!)
-{ tokens: N } - Keep N tokens worth of messages
-{ fraction: 0.3 } - Keep 30% of context 
-(default: { messages: 20 })
-*/

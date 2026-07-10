@@ -4,7 +4,8 @@
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
  * - "How do I add validation constraints like min/max to Zod schema fields?"
- * - "How would I handle arrays of nested objects in a schema?"
+ * - "How would I handle arrays of nested objects in a schema?" -- field: z.array(z.object()||object)
+ * - can we provide 2 types to a same field for eg: date can be both in number or string?
  */
 
 import { ChatOpenAI } from "@langchain/openai";
@@ -24,7 +25,7 @@ async function main() {
   // Define a complex nested schema
   const CompanySchema = z.object({
     name: z.string().describe("Company name"),
-    founded: z.number().describe("Year the company was founded"),
+    founded: z.number().nullish().describe("Year the company was founded"),
     headquarters: z
       .object({
         city: z.string(),
@@ -33,12 +34,13 @@ async function main() {
       .describe("Company headquarters location"),
     products: z.array(z.string()).describe("List of main products or services"),
     employeeCount: z.number().describe("Approximate number of employees"),
-    isPublic: z.boolean().describe("Whether the company is publicly traded"),
+    isPublic: z.boolean().describe("Whether the company is publicly traded"), // available on stock market ?
   });
 
   // Create structured model with strict mode for reliable schema compliance
   const structuredModel = model.withStructuredOutput(CompanySchema, {
     strict: true,
+    // includeRaw: true,
   });
 
   // Create a prompt template
@@ -50,7 +52,7 @@ async function main() {
     ["human", "{text}"],
   ]);
 
-  // Combine template with structured output
+  // {{Combine(pipe) template with structured output model}}
   const chain = template.pipe(structuredModel);
 
   console.log("🧪 Extracting data from company descriptions:\n");
@@ -119,3 +121,115 @@ async function main() {
 }
 
 main().catch(console.error);
+
+// ZOD mastery:-
+const PersonSchema = z.object({
+  name: z.string().min(2).max(100), // string length
+  age: z.number().int().min(0).max(150), // numeric range
+  email: z.string().email(), // email format
+  salary: z.number().positive().min(20000), // positive & min value
+  password: z.string().min(8), // length constraint
+  score: z.number().min(0).max(100), // 0-100 range
+});
+
+// With custom error messages
+const StrictSchema = z.object({
+  age: z.number().min(18, { message: "Must be 18 or older" }).max(120, { message: "Invalid age" }),
+  email: z.string().email("Invalid email format"),
+});
+
+/*
+Common constraints:
+
+- min(n), max(n) — length or numeric range
+- int() — must be integer & not real(float)
+- positive(), negative() — numeric direction
+- email(), url() — format validation
+- regex(pattern) — custom pattern matching
+*/
+
+const OrderSchema = z.object({
+  orderId: z.string(),
+  items: z.array(
+    z.object({
+      productId: z.string(),
+      name: z.string(),
+      quantity: z.number().min(1),
+      price: z.number().positive(),
+    })
+  ),
+  customer: z.object({
+    name: z.string(),
+    email: z.string().email(),
+  }),
+});
+
+// Reusable nested schema (cleaner)
+const ItemSchema = z.object({
+  productId: z.string(),
+  name: z.string(),
+  quantity: z.number().min(1),
+  price: z.number().positive(),
+});
+
+const OrderSchema2 = z.object({
+  orderId: z.string(),
+  items: z.array(ItemSchema), // array of ItemSchema
+  totalItems: z.number(),
+});
+
+const EventSchema = z.object({
+  name: z.string(),
+  // Date can be either string or number (timestamp)
+  date: z.union([
+    z.string().datetime(), // ISO datetime string
+    z.number().int().positive(), // Unix timestamp (ms)
+  ]),
+
+  // Status can be string or enum
+  status: z.union([z.literal("pending"), z.literal("active"), z.literal("completed")]),
+
+  // Value can be string or number
+  value: z.union([z.string(), z.number()]),
+});
+
+// Shorthand using .or()
+const FlexibleSchema = z.object({
+  date: z.string().or(z.number()),
+  value: z.string().or(z.number()).or(z.null()),
+});
+const ComplexDataSchema = z.object({
+  // Constraints example
+  userId: z.string().min(3).max(20),
+  age: z.number().min(18).max(150),
+
+  // Arrays of nested objects
+  tags: z.array(
+    z.object({
+      name: z.string().min(1),
+      value: z.number().min(0),
+    })
+  ),
+
+  // Union types (multiple accepted types)
+  createdAt: z.union([
+    z.string().datetime(), // ISO string
+    z.number().int().positive(), // Unix timestamp
+  ]),
+
+  // Status with validation
+  status: z.enum(["active", "inactive", "pending"]),
+});
+
+type CompanySchema = {
+  name: string;
+  founded: number;
+  headquarters: {
+    // Nested object
+    city: string;
+    country: string;
+  };
+  products: string[]; // Array
+  employeeCount: number;
+  isPublic: boolean;
+};

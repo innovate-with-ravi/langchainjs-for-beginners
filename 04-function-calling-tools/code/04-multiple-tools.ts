@@ -4,7 +4,7 @@
  * Run: npx tsx 04-function-calling-tools/code/04-multiple-tools.ts
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
- * - "How does the LLM decide which tool to use for each query?"
+ * - "How does the LLM decide which tool to use for each query?" -- llm learns about tools when binded using descriptions, schema etc.. (is my answer correct?)
  * - "Can I prioritize certain tools over others by adjusting their descriptions?"
  */
 
@@ -43,14 +43,11 @@ const searchTool = tool(
   }
 );
 
-const weatherTool = tool(
-  async (input) => `Weather in ${input.city}: 72°F, sunny`,
-  {
-    name: "getWeather",
-    description: "Get current weather for a city",
-    schema: z.object({ city: z.string() }),
-  }
-);
+const weatherTool = tool(async (input) => `Weather in ${input.city}: 72°F, sunny`, {
+  name: "getWeather",
+  description: "Get current weather for a city",
+  schema: z.object({ city: z.string() }),
+});
 
 async function main() {
   console.log("🎛️ Multiple Tools Demo\n");

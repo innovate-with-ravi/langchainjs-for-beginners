@@ -11,6 +11,7 @@ import "dotenv/config";
 
 async function main() {
   console.log("🚀 Hello LangChain.js!\n");
+
   const model = new ChatOpenAI({
     model: process.env.AI_MODEL,
     configuration: { baseURL: process.env.AI_ENDPOINT },
@@ -19,6 +20,7 @@ async function main() {
 
   const response = await model.invoke("What is LangChain in one sentence?");
 
+  console.log("Response:", response);
   console.log("🤖 AI Response:", response.content);
   console.log("\n✅ Success! You just made your first LangChain.js call!");
 }

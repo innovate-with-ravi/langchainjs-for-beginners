@@ -4,17 +4,11 @@
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
  * - "How do I build a multi-turn conversation with message arrays?"
- * - "Can I serialize and deserialize message arrays for storage?"
+ * - "Can I serialize and deserialize message arrays for storage & how?"
  */
 
 import { ChatOpenAI } from "@langchain/openai";
-import {
-  HumanMessage,
-  SystemMessage,
-  AIMessage,
-  ToolMessage,
-  BaseMessage,
-} from "langchain";
+import { HumanMessage, SystemMessage, AIMessage, ToolMessage, BaseMessage } from "langchain";
 import "dotenv/config";
 
 async function main() {
@@ -32,9 +26,7 @@ async function main() {
   console.log("=".repeat(80));
   console.log("\n📝 PATTERN 1: Basic Message Types\n");
 
-  const systemMsg = new SystemMessage(
-    "You are a helpful programming assistant.",
-  );
+  const systemMsg = new SystemMessage("You are a helpful programming assistant.");
   const humanMsg = new HumanMessage("What is a variable?");
 
   console.log("Message types:");
@@ -59,7 +51,9 @@ async function main() {
 
   console.log("Conversation history:");
   conversationMessages.forEach((msg, i) => {
-    const role = msg._getType();
+    if (i == 0) console.log(msg);
+
+    const role = msg.type;
     console.log(`   ${i + 1}. [${role}]: ${msg.content}`);
   });
 
@@ -80,8 +74,8 @@ async function main() {
 
   function createConversation(
     role: string,
-    examples: Array<{ question: string; answer: string }>,
-    newQuestion: string,
+    examples: { question: string; answer: string }[], //Array<{ question: string; answer: string }>
+    newQuestion: string
   ): BaseMessage[] {
     const messages: BaseMessage[] = [new SystemMessage(`You are a ${role}.`)];
 
@@ -104,19 +98,19 @@ async function main() {
       { question: "sad", answer: "😢" },
       { question: "excited", answer: "🎉" },
     ],
-    "surprised",
+    "surprised"
   );
 
   console.log("Dynamically constructed conversation:");
   emojiMessages.forEach((msg, i) => {
-    console.log(`   ${i + 1}. [${msg._getType()}]: ${msg.content}`);
+    console.log(`   ${i + 1}. [${msg.type}]: ${msg.content}`);
   });
 
   const response3 = await model.invoke(emojiMessages);
   console.log(`\n🤖 AI Response: ${response3.content}\n`);
 
   console.log("💡 This pattern is useful for:");
-  console.log("   • Building few-shot prompts programmatically");
+  console.log("   • Building few-shot prompts programmatically(dynamically)");
   console.log("   • Creating conversation builders");
   console.log("   • Managing state in agents");
   console.log("   • Storing/loading conversation history from databases");
@@ -129,7 +123,7 @@ async function main() {
 
   const messageWithMetadata = new HumanMessage({
     content: "What's the weather like?",
-    // Additional metadata can be stored
+    // Additional metadata can be stored -> it can be any key:value pair
     additional_kwargs: {
       timestamp: new Date().toISOString(),
       userId: "user-123",
@@ -142,9 +136,9 @@ async function main() {
 
   console.log("💡 Use metadata for:");
   console.log("   • Tracking conversation timestamps");
-  console.log("   • Storing user IDs for multi-user systems");
-  console.log("   • Adding context without affecting AI processing");
-  console.log("   • Debugging and logging");
+  console.log("   • {{Storing user IDs for multi-user systems}}");
+  console.log("   • {{Adding context without affecting AI processing like commented text}}");
+  console.log("   • {{Debugging and ((logging))}}");
 
   // ==========================================
   // COMPARISON WITH AGENTS
@@ -155,8 +149,8 @@ async function main() {
   console.log("When you use createAgent() (Chapter 7), it:");
   console.log("   1. Takes message arrays as input");
   console.log("   2. Processes messages through middleware");
-  console.log("   3. Adds ToolMessage for tool calls/results");
-  console.log("   4. Returns updated message array with agent's response\n");
+  console.log("   3. Adds ToolMessage for tool calls/{results}");
+  console.log("   {{4. Returns updated message array with agent's response}}\n");
 
   console.log("Example agent flow:");
   console.log("   [HumanMessage] → Agent → [HumanMessage, ToolMessage, AIMessage]");
@@ -171,3 +165,11 @@ async function main() {
 }
 
 main().catch(console.error);
+
+/*
+Why This Matters for Agents:
+
+ - Agents need to construct messages dynamically based on tool results
+ - Few-shot examples improve agent decision-making and consistency
+ - Programmatic message building allows {{loading conversation history from databases}}
+*/

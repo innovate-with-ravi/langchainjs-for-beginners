@@ -25,6 +25,7 @@ const templates = {
       ["system", "You are a programming instructor. Explain code clearly to beginners."],
       [
         "human",
+        // .md text
         `Explain this {language} code:
 
 \`\`\`{language}
@@ -47,7 +48,7 @@ Describe what it does, how it works, and any key concepts.`,
   },
 
   creativeWriter: {
-    name: "Creative Writing Prompt",
+    name: "Creative Writing Prompt", // set the model's temp to 1.0+
     description: "Generates creative writing based on prompts",
     variables: ["genre", "theme", "length"],
     template: ChatPromptTemplate.fromMessages([
@@ -88,6 +89,7 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
+// automatically async as func returning Promise is async
 function question(prompt: string): Promise<string> {
   return new Promise((resolve) => {
     rl.question(prompt, resolve);
@@ -96,6 +98,8 @@ function question(prompt: string): Promise<string> {
 
 function listTemplates() {
   console.log("\n📚 Available Templates:\n");
+
+  // Object.entries(objects)-> returns an array of objects
   Object.entries(templates).forEach(([key, template], index) => {
     console.log(`${index + 1}. ${template.name}`);
     console.log(`   ${template.description}`);
@@ -104,12 +108,12 @@ function listTemplates() {
 }
 
 async function executeTemplate(templateKey: string, variables: Record<string, string>) {
-  const template = templates[templateKey as keyof typeof templates];
+  const tmpl = templates[templateKey as keyof typeof templates];
 
   console.log("\n🔄 Processing...\n");
   console.log("─".repeat(80));
 
-  const chain = template.template.pipe(model);
+  const chain = tmpl.template.pipe(model);
   const result = await chain.invoke(variables);
 
   console.log(result.content);
@@ -157,14 +161,14 @@ async function main() {
   }
 
   const templateKey = templateKeys[templateIndex];
-  const template = templates[templateKey as keyof typeof templates];
+  const tmpl = templates[templateKey as keyof typeof templates];
 
-  console.log(`\n✅ Selected: ${template.name}\n`);
+  console.log(`\n✅ Selected: ${tmpl.name}\n`);
 
   // Collect variables
   const variables: Record<string, string> = {};
 
-  for (const variable of template.variables) {
+  for (const variable of tmpl.variables) {
     const value = await question(`Enter ${variable}: `);
     variables[variable] = value;
   }

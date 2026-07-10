@@ -48,7 +48,11 @@ async function main() {
   const response = await modelWithTools.invoke("What is 25 * 17?");
 
   console.log("Response content:", response.content);
-  console.log("\nTool calls:", JSON.stringify(response.tool_calls, null, 2));
+  console.log(
+    "\nTool calls:",
+    JSON.stringify(response.tool_calls, null, 2)
+    /*need to print using JSON.stringify when there is a nested object*/
+  );
 
   if (response.tool_calls && response.tool_calls.length > 0) {
     console.log("\n" + "─".repeat(80));
@@ -62,7 +66,7 @@ async function main() {
   console.log("💡 Key Takeaways:");
   console.log("   • Use bindTools() to make tools available");
   console.log("   • LLM generates tool calls with arguments");
-  console.log("   • Tool calls include name, args, and ID");
+  console.log("   • Tool calls include name, args, and ID(a unique call_id)");
   console.log("   • Your code executes the actual function");
 }
 

@@ -11,8 +11,8 @@ import "dotenv/config";
 const question = "Explain the difference between machine learning and deep learning.";
 
 const models = [
-  { name: "gpt-5", description: "Most capable" },
-  { name: "gpt-5-mini", description: "Fast and efficient" },
+  { name: "gpt-4o", description: "Most capable" },
+  { name: "gpt-4o-mini", description: "Fast and efficient" },
 ];
 
 interface ModelResult {

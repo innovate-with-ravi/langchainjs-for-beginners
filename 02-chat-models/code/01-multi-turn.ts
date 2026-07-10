@@ -3,7 +3,7 @@
  * Run: npx tsx 02-chat-models/code/01-multi-turn.ts
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
- * - "Why do we need to push AIMessage to the messages array after each response?"
+ * - "Why do we need to push AIMessage to the messages array after each response?" -- as models don't remember conversation history. So we maintain one & send AI the whole conversation (including new qsn.)
  * - "How would I implement a loop to keep the conversation going with user input?"
  */
 
@@ -31,7 +31,8 @@ async function main() {
   // First exchange
   const response1 = await model.invoke(messages);
   console.log("\n🤖 AI:", response1.content);
-  messages.push(new AIMessage(String(response1.content)));
+  messages.push(new AIMessage(response1.content.toString()));
+  console.log("messages:", messages);
 
   // Second exchange - AI remembers the context
   console.log("\n👤 User: Can you show me a simple example?");
@@ -43,6 +44,7 @@ async function main() {
   // Third exchange - AI still remembers everything
   console.log("\n👤 User: What are the benefits compared to JavaScript?");
   messages.push(new AIMessage(String(response2.content)));
+  console.log("messages:", messages);
   messages.push(new HumanMessage("What are the benefits compared to JavaScript?"));
 
   const response3 = await model.invoke(messages);

@@ -4,7 +4,7 @@
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
  * - "What's the difference between SystemMessage and HumanMessage?"
- * - "How would I add an AIMessage to continue this conversation?"
+ * - "How would I add an AIMessage to continue this conversation?"=> role: "developer"
  */
 
 import { ChatOpenAI } from "@langchain/openai";
@@ -22,7 +22,7 @@ async function main() {
 
   // Using structured messages for better control
   const messages = [
-    new SystemMessage("You are a helpful AI assistant who explains things simply."),
+    new SystemMessage("You are a helpful AI assistant who explains things simply."),// object of SystemMessage() class => new SystemMessage()
     new HumanMessage("Explain quantum computing to a 10-year-old."),
   ];
 

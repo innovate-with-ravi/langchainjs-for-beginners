@@ -62,4 +62,4 @@ console.log("🎉 Welcome to the Q&A Program!");
 console.log("Type your question and press Enter.");
 console.log("Type 'quit' or 'exit' to stop.\n");
 
-askQuestion();
+await askQuestion();

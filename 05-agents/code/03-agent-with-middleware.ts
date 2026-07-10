@@ -5,19 +5,19 @@ import * as z from "zod";
 import "dotenv/config";
 
 /**
- * Example 3: createAgent() with Middleware
+ * Example 3: createAgent() with Middleware (createMiddleware())
  *
- * Middleware allows you to intercept and modify agent behavior.
+ * Middleware allows you to intercept(obstruct) and modify agent behavior.
  * This example shows two powerful middleware patterns:
  *
  * 1. Dynamic Model Selection - Switch models based on conversation complexity
  * 2. Custom Error Handling - Gracefully handle tool failures
  *
  * Use middleware for:
- * - Logging and monitoring
+ * - Logging and monitoring(tokens & cost)
  * - Cost optimization (cheaper models for simple tasks)
  * - Error recovery
- * - Request/response transformation
+ * - Request/response transformation (such as modifying prompt for video generation)
  */
 
 // Define tools
@@ -33,7 +33,7 @@ const calculatorTool = tool(
     schema: z.object({
       expression: z.string().describe("The mathematical expression to evaluate"),
     }),
-  },
+  }
 );
 
 const searchTool = tool(
@@ -51,7 +51,7 @@ const searchTool = tool(
     schema: z.object({
       query: z.string().describe("The search query"),
     }),
-  },
+  }
 );
 
 async function main() {
@@ -75,17 +75,19 @@ async function main() {
   // Switches to more capable model for long conversations
   const dynamicModelSelection = createMiddleware({
     name: "DynamicModelSelection",
-    wrapModelCall: (request, handler) => {
+
+    wrapModelCall: (request /*ModelRequest*/, handler /*function to invoke the model*/) => {
       const messageCount = request.messages.length;
-      console.log(`  [Middleware] Message count: ${messageCount}`);
+      console.log(`  [Middleware-dynamicModelSelection] Message count: ${messageCount}`);
+
+      // console.log(
+      //   `[Middleware-dynamicModelSelection] request /*ModelRequest*/: ${JSON.stringify(request, null, 2)}`
+      // );
 
       // Use more capable model for complex conversations (>10 messages)
       if (messageCount > 10) {
-        console.log(`  [Middleware] 🔄 Switching to more capable model\n`);
-        return handler({
-          ...request,
-          model: capableModel,
-        });
+        console.log(`  [Middleware-dynamicModelSelection] 🔄 Switching to more capable model\n`);
+        return handler({ ...request, model: capableModel });
       }
 
       console.log(`  [Middleware] ✓ Using basic model\n`);
@@ -93,16 +95,24 @@ async function main() {
     },
   });
 
-  // Middleware 2: Custom Error Handling
-  // Catches tool failures and provides helpful fallback messages
+  // Middleware 2: {{Custom}} Error Handling
+  // Catches tool failures and provides helpful {{fallback}} messages
   const toolErrorHandler = createMiddleware({
     name: "ToolErrorHandler",
-    wrapToolCall: async (request, handler) => {
+
+    // handles toolCall Errors
+    wrapToolCall /*wrapper for toolCall*/: async (request, handler) => {
+      // console.log(
+      //   `[Middleware-toolErrorHandler] request /*ToolRequest*/: ${JSON.stringify(request, null, 2)}`
+      // );
+
       try {
         return await handler(request);
       } catch (error: any) {
-        console.error(`  [Middleware] ⚠️  Tool "${request.tool?.name}" failed: ${error.message}`);
-        console.log(`  [Middleware] 🔄 Returning fallback message\n`);
+        console.error(
+          `  [Middleware-toolErrorHandler] ⚠️  Tool "${request.tool?.name}" failed: ${error.message}`
+        );
+        console.log(`  [Middleware-toolErrorHandler] 🔄 Returning fallback message\n`);
         // Return graceful fallback as a ToolMessage
         return new ToolMessage({
           content: `I encountered an error while using the ${request.tool?.name} tool: ${error.message}. Let me try a different approach to answer your question.`,
@@ -120,22 +130,28 @@ async function main() {
   });
 
   // Test 1: Simple calculation with dynamic model selection
-  console.log("Test 1: Simple calculation");
-  console.log("─".repeat(60));
-  const query1 = "What is 25 * 8?";
-  console.log(`👤 User: ${query1}\n`);
-  const response1 = await agent.invoke({ messages: [new HumanMessage(query1)] });
-  const lastMessage1 = response1.messages[response1.messages.length - 1];
-  console.log(`🤖 Agent: ${lastMessage1.content}\n\n`);
+  {
+    console.log("Test 1: Simple calculation");
+    console.log("─".repeat(60));
+    const query1 = "What is 25 * 8?";
+    console.log(`👤 User: ${query1}\n`);
+    const response1 = await agent.invoke({ messages: [new HumanMessage(query1)] });
+    const lastMessage1 = response1.messages[response1.messages.length - 1];
+    console.log(`🤖 Agent: ${lastMessage1.content}\n\n`);
+  }
 
-  // Test 2: Search with error handling
-  console.log("Test 2: Search with error handling");
-  console.log("─".repeat(60));
-  const query2 = "Search for information about error handling";
-  console.log(`👤 User: ${query2}\n`);
-  const response2 = await agent.invoke({ messages: [new HumanMessage(query2)] });
-  const lastMessage2 = response2.messages[response2.messages.length - 1];
-  console.log(`🤖 Agent: ${lastMessage2.content}\n\n`);
+  {
+    // Test 2: Search with error handling
+    console.log("Test 2: Search with error handling");
+    console.log("─".repeat(60));
+    const query2 = "Search for information about error handling";
+    console.log(`👤 User: ${query2}\n`);
+    // new messages[] sent
+    const response2 = await agent.invoke({ messages: [new HumanMessage(query2)] });
+    console.log("ToolMessage.content:", response2.messages[2].content); // contains fallback msg as ToolMessage
+    const lastMessage2 = response2.messages[response2.messages.length - 1];
+    console.log(`🤖 Agent: ${lastMessage2.content}\n\n`);
+  }
 
   console.log("💡 Middleware Benefits:");
   console.log("   • Dynamic model selection → Cost optimization");
@@ -152,3 +168,20 @@ async function main() {
 }
 
 main().catch(console.error);
+
+/*
+Two Middleware Types:
+
+wrapModelCall - Intercepts calls TO the model
+
+Dynamic model selection based on conversation length
+Request logging and monitoring
+Context injection (user permissions, session data)
+
+
+wrapToolCall - Intercepts tool executions
+
+Error handling and retries
+Tool result transformation
+Permission checks before tool execution
+*/

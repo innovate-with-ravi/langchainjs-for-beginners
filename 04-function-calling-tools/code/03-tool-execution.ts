@@ -87,7 +87,9 @@ async function main() {
   // The LLM converts raw data into human-friendly language
 
   console.log("=== STEP 3: SEND RESULTS BACK TO LLM ===");
-  console.log("(The LLM's role: Communicating - converts data to natural language)\n");
+  console.log(
+    "(The LLM's role: Communicating - converts raw data(tool_result) to natural language)\n"
+  );
 
   const messages = [
     new HumanMessage(query),
@@ -123,3 +125,53 @@ async function main() {
 }
 
 main().catch(console.error);
+
+/*
+## How to handle tool execution errors
+
+You should wrap tool execution in a safe error-handling path and return a structured error message to the model.
+
+Example:
+
+```ts
+try {
+  const toolResult = await weatherTool.invoke(
+    weatherTool.schema.parse(toolCall.args)
+  );
+
+  console.log("Tool executed successfully:", toolResult);
+} catch (error) {
+  console.error("Tool execution failed:", error);
+
+  const errorMessage =
+    error instanceof Error ? error.message : "Unknown tool error";
+
+  // Send a useful failure message back to the LLM
+  const messages = [
+    new HumanMessage(query),
+    new AIMessage({
+      content: response1.content,
+      tool_calls: response1.tool_calls,
+    }),
+    new ToolMessage({
+      content: `Tool execution failed: ${errorMessage}`,
+      tool_call_id: toolCall.id || "",
+    }),
+  ];
+
+  const finalResponse = await model.invoke(messages);
+  console.log(finalResponse.content);
+}
+```
+
+## Best practice
+
+A good pattern is:
+
+- validate arguments before running the tool
+- catch exceptions
+- return a clear error string
+- let the LLM respond gracefully instead of crashing
+
+So the model doesn’t need to “know” the implementation details — it just needs a reliable result or a useful failure message.
+*/

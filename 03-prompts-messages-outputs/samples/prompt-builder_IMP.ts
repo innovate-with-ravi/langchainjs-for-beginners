@@ -36,6 +36,10 @@ const formatPrompts = {
   "Q&A": "Format your response as questions and answers.",
 };
 
+// The parameters below use `keyof typeof <object>` which produces {a union
+// type of the object's keys}. For example, `keyof typeof rolePrompts` is
+// equivalent to: "Teacher" | "Expert" | "Friend" | "Professional".
+// This constrains callers to only pass one of the existing keys.
 function buildTemplate(
   role: keyof typeof rolePrompts,
   style: keyof typeof stylePrompts,

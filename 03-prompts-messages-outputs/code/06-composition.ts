@@ -20,7 +20,7 @@ async function educatorExample() {
     apiKey: process.env.AI_API_KEY,
   });
 
-  // Reusable prompt pieces
+  // Reusable & Composable prompt pieces
   const systemRole = "You are an expert {domain} educator.";
   const teachingContext =
     "Teaching level: {level}\nAudience: {audience}\nGoal: Clear, accurate explanations";
@@ -92,7 +92,7 @@ async function customerServiceExample() {
 }
 
 async function partialTemplateExample() {
-  console.log("\n" + "=".repeat(80));
+  console.log("\n" + "==".repeat(40));
   console.log("\n3️⃣  Example: Partial Templates (Pre-fill Some Variables)\n");
 
   const model = new ChatOpenAI({

@@ -13,8 +13,9 @@ interface ChatOptions {
 }
 
 async function robustChat(prompt: string, options: ChatOptions = {}): Promise<string> {
+  // extract values from options
   const {
-    maxRetries = 3,
+    maxRetries = 3, // default value
     timeout = 30000,
     fallbackResponse = "I apologize, but I'm having trouble connecting right now. Please try again later.",
   } = options;
@@ -37,6 +38,7 @@ async function robustChat(prompt: string, options: ChatOptions = {}): Promise<st
     console.log(`✅ Success!\n`);
 
     return response.content.toString();
+    // throws errror aftet maxTries retires
   } catch (error: any) {
     console.error(`❌ All ${maxRetries} attempts failed: ${error.message}`);
 
@@ -55,6 +57,7 @@ async function robustChat(prompt: string, options: ChatOptions = {}): Promise<st
     console.log(`📋 Error type: ${errorType}`);
     console.log(`💡 Returning fallback response\n`);
 
+    // catch the error after maxTries & give the fallbackResponse
     return fallbackResponse;
   }
 }
@@ -62,14 +65,16 @@ async function robustChat(prompt: string, options: ChatOptions = {}): Promise<st
 async function testRobustChat() {
   console.log("🛡️  Robust Error Handler Test\n");
   console.log("=".repeat(80));
+
   console.log("\n1️⃣  Test: Normal Call (should succeed)\n");
   const response1 = await robustChat("What is 2+2?");
   console.log("Response:", response1);
+
   console.log("\n" + "=".repeat(80));
   console.log("\n2️⃣  Test: Invalid API Key (will retry then fallback)\n");
 
   // Temporarily test with invalid key
-  process.env.AI_API_KEY_BACKUP = process.env.AI_API_KEY;
+  process.env.AI_API_KEY_BACKUP = process.env.AI_API_KEY; // can use process.env.x as variable in system's memory directly
   process.env.AI_API_KEY = "invalid_key";
 
   const response2 = await robustChat("Hello", {

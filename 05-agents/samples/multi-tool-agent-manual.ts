@@ -14,6 +14,7 @@ import { tool } from "langchain";
 import { evaluate } from "mathjs";
 import * as z from "zod";
 import "dotenv/config";
+import { ChatGroq } from "@langchain/groq";
 
 const calculatorTool = tool(
   async (input) => {
@@ -57,10 +58,9 @@ async function main() {
   console.log("🎛️ Multi-Tool Agent Demo\n");
   console.log("=".repeat(80) + "\n");
 
-  const model = new ChatOpenAI({
-    model: process.env.AI_MODEL,
-    configuration: { baseURL: process.env.AI_ENDPOINT },
-    apiKey: process.env.AI_API_KEY,
+  const model = new ChatGroq({
+    model: "llama-3.1-8b-instant",
+    apiKey: process.env.GROQ_API_KEY,
   });
 
   const modelWithTools = model.bindTools([calculatorTool, weatherTool, searchTool]);

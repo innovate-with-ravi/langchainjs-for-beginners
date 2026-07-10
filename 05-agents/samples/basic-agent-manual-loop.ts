@@ -14,7 +14,7 @@
  */
 
 import { ChatOpenAI } from "@langchain/openai";
-import { AIMessage,HumanMessage,ToolMessage,tool } from "langchain";
+import { AIMessage, HumanMessage, ToolMessage, tool } from "langchain";
 import { evaluate } from "mathjs";
 import * as z from "zod";
 import "dotenv/config";

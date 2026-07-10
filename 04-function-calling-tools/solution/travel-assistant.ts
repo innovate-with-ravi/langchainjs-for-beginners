@@ -13,7 +13,7 @@ import "dotenv/config";
 const currencyConverter = tool(
   async (input) => {
     // Simulated exchange rates (relative to USD)
-    const rates: Record<string, number> = {
+    const rates: Record<string, number> /*specifying type here allows to avoid keyof typeof...*/ = {
       USD: 1.0,
       EUR: 0.92,
       GBP: 0.79,
@@ -55,6 +55,8 @@ const currencyConverter = tool(
 const distanceCalculator = tool(
   async (input) => {
     // Simulated distances between major cities (in kilometers)
+
+    // alwyas give type of maps to avoid key type issues
     const distances: Record<string, Record<string, number>> = {
       "New York": { London: 5585, Paris: 5837, Tokyo: 10850, Sydney: 15993 },
       London: { "New York": 5585, Paris: 344, Tokyo: 9562, Sydney: 17015 },
@@ -78,8 +80,7 @@ const distanceCalculator = tool(
     }
 
     const units = input.units || "kilometers";
-    const distance =
-      units === "miles" ? (distanceKm * 0.621371).toFixed(0) : distanceKm;
+    const distance = units === "miles" ? (distanceKm * 0.621371).toFixed(0) : distanceKm;
     const unit = units === "miles" ? "miles" : "kilometers";
 
     return `The distance from ${fromCity} to ${toCity} is approximately ${distance} ${unit}`;
@@ -89,9 +90,7 @@ const distanceCalculator = tool(
     description:
       "Calculate the distance between two cities in miles or kilometers. Use this when the user asks about distance between locations, how far apart cities are, or travel distances.",
     schema: z.object({
-      from: z
-        .string()
-        .describe("Starting city name, e.g., 'New York' or 'Paris'"),
+      from: z.string().describe("Starting city name, e.g., 'New York' or 'Paris'"),
       to: z.string().describe("Destination city name, e.g., 'London' or 'Tokyo'"),
       units: z
         .enum(["miles", "kilometers"])
@@ -152,11 +151,7 @@ async function main() {
     apiKey: process.env.AI_API_KEY,
   });
 
-  const modelWithTools = model.bindTools([
-    currencyConverter,
-    distanceCalculator,
-    timeZoneTool,
-  ]);
+  const modelWithTools = model.bindTools([currencyConverter, distanceCalculator, timeZoneTool]);
 
   // Test queries for each tool
   const queries = [
@@ -181,10 +176,14 @@ async function main() {
       let toolResult;
       switch (toolCall.name) {
         case "currencyConverter":
-          toolResult = await currencyConverter.invoke(currencyConverter.schema.parse(toolCall.args));
+          toolResult = await currencyConverter.invoke(
+            currencyConverter.schema.parse(toolCall.args)
+          );
           break;
         case "distanceCalculator":
-          toolResult = await distanceCalculator.invoke(distanceCalculator.schema.parse(toolCall.args));
+          toolResult = await distanceCalculator.invoke(
+            distanceCalculator.schema.parse(toolCall.args)
+          );
           break;
         case "timeZoneTool":
           toolResult = await timeZoneTool.invoke(timeZoneTool.schema.parse(toolCall.args));

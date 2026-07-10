@@ -4,7 +4,7 @@
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
  * - "How many examples should I provide for effective few-shot prompting?"
- * - "Can I dynamically select which examples to include based on the input?"
+ * - "Can I dynamically select which examples to include based on the input?" -- exampleSelector: function()
  */
 
 import { ChatPromptTemplate, FewShotChatMessagePromptTemplate } from "@langchain/core/prompts";
@@ -19,12 +19,31 @@ async function emotionToEmojiExample() {
     configuration: { baseURL: process.env.AI_ENDPOINT },
     apiKey: process.env.AI_API_KEY,
   });
+
+  // always give egs[] in {inp:"human" , oup:"ai"}
   const examples = [
     { input: "happy", output: "😊" },
     { input: "sad", output: "😢" },
     { input: "excited", output: "🎉" },
     { input: "angry", output: "😠" },
   ];
+
+  // // Create example template
+  // const exampleTemplate = ChatPromptTemplate.fromMessages([
+  //   ["human", "{input}"],
+  //   ["ai", "{output}"],
+  // ]);
+
+  // // Create few-shot template
+  // const fewShotTemplate = new FewShotChatMessagePromptTemplate({
+  //   examplePrompt: exampleTemplate,
+  //   exampleSeparator: "\n",
+  //   examples: examples,
+  //   inputVariables: [],
+  //   prefix: "Examples",
+  // });
+
+  // console.log(fewShotTemplate.format([]));
 
   // Create example template
   const exampleTemplate = ChatPromptTemplate.fromMessages([

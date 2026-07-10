@@ -5,7 +5,7 @@
  */
 
 import { ChatOpenAI } from "@langchain/openai";
-import { AIMessage,HumanMessage,ToolMessage,tool } from "langchain";
+import { AIMessage, HumanMessage, ToolMessage, tool } from "langchain";
 import * as z from "zod";
 import "dotenv/config";
 
@@ -13,10 +13,7 @@ import "dotenv/config";
 const weatherTool = tool(
   async (input) => {
     // Simulated weather data for various cities
-    const weatherData: Record<
-      string,
-      { temp_f: number; temp_c: number; condition: string }
-    > = {
+    const weatherData: Record<string, { temp_f: number; temp_c: number; condition: string }> = {
       Tokyo: { temp_f: 75, temp_c: 24, condition: "partly cloudy" },
       Paris: { temp_f: 64, temp_c: 18, condition: "sunny" },
       London: { temp_f: 59, temp_c: 15, condition: "rainy" },
@@ -99,10 +96,12 @@ async function main() {
     console.log("\nStep 3: Sending result back to LLM...");
     const messages = [
       new HumanMessage(query),
+      // new AIMessage({content: , tool_calls: })
       new AIMessage({
         content: response1.content,
         tool_calls: response1.tool_calls,
       }),
+      // new ToolMessage({content: , tool_call_id: })
       new ToolMessage({
         content: String(toolResult),
         tool_call_id: toolCall.id || "",

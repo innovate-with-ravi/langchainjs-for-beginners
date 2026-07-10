@@ -51,9 +51,9 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-function question(prompt: string): Promise<string> {
+async function question(prompt: string): Promise<string> {
   return new Promise((resolve) => {
-    rl.question(prompt, resolve);
+    rl.question(prompt, (ans) => resolve(ans));
   });
 }
 

@@ -30,11 +30,9 @@ const calculatorTool = tool(
     description:
       "A calculator that can perform basic arithmetic operations. Use this when you need to calculate mathematical expressions.",
     schema: z.object({
-      expression: z
-        .string()
-        .describe("The mathematical expression to evaluate (e.g., '25 * 8')"),
+      expression: z.string().describe("The mathematical expression to evaluate (e.g., '25 * 8')"),
     }),
-  },
+  }
 );
 
 async function main() {
@@ -57,7 +55,7 @@ async function main() {
   const query = "What is 125 * 8?";
   console.log(`👤 User: ${query}\n`);
 
-  // createAgent() returns a LangGraph agent that expects messages array
+  // createAgent() {{returns a LangGraph agent}} that expects messages array
   const response = await agent.invoke({ messages: [new HumanMessage(query)] });
   // The response contains the full state, including all messages
   // Get the last message which is the agent's final answer
@@ -71,9 +69,7 @@ async function main() {
   console.log("   • Same result, simpler API\n");
 
   console.log("✅ Under the hood:");
-  console.log(
-    "   createAgent() implements the ReAct pattern (Thought → Action → Observation)",
-  );
+  console.log("   createAgent() implements the ReAct pattern (Thought → Action → Observation)");
   console.log("   and handles all the boilerplate for you.");
 }
 

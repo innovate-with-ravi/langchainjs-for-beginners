@@ -3,7 +3,7 @@
  * Run: npx tsx 02-chat-models/code/02-streaming.ts
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
- * - "How does the 'for await...of' loop work with the stream?"
+ * - {{"How does the 'for await...of' loop work with the stream?"}}
  * - "Can I collect all chunks into a single string while streaming?"
  */
 
@@ -71,3 +71,5 @@ async function main() {
 }
 
 main().catch(console.error);
+
+// 💡 Bonus: To track token usage with streaming, some providers support streamOptions: { includeUsage: true } which includes usage metadata in the final chunk. This is provider-dependent - check your provider's documentation for availability.

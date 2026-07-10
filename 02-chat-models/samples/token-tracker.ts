@@ -8,34 +8,38 @@
 import { ChatOpenAI } from "@langchain/openai";
 import "dotenv/config";
 
-interface TokenUsage {
+// {{reusable code, just extend for multi-turn(conversation history)}} => export
+
+export interface TokenUsage {
   promptTokens: number;
   completionTokens: number;
   totalTokens: number;
   cost: number;
 }
 
-interface CallRecord {
+export interface CallRecord {
   callNumber: number;
-  query: string;
+  query: string; // i/p
   usage: TokenUsage;
 }
 
-class TokenTracker {
+export class TokenTracker {
   private calls: CallRecord[] = [];
   private callCount: number = 0;
 
   // Pricing per 1M tokens (approximate for gpt-5-mini)
-  private readonly INPUT_COST_PER_MILLION = 0.15; // $0.15 per 1M input tokens
+  private readonly /*constant*/ INPUT_COST_PER_MILLION = 0.15; // $0.15 per 1M input tokens
   private readonly OUTPUT_COST_PER_MILLION = 0.6; // $0.60 per 1M output tokens
   private readonly WARNING_THRESHOLD = 10000; // Warn at 10k tokens
 
+  // public
   calculateCost(inputTokens: number, outputTokens: number): number {
     const inputCost = (inputTokens / 1_000_000) * this.INPUT_COST_PER_MILLION;
     const outputCost = (outputTokens / 1_000_000) * this.OUTPUT_COST_PER_MILLION;
     return inputCost + outputCost;
   }
 
+  // instead of direct model.invoke do trackCall(model, prompt)
   async trackCall(model: ChatOpenAI, query: string): Promise<string> {
     this.callCount++;
 

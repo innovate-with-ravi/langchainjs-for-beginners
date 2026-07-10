@@ -5,7 +5,7 @@
  * provider that delivers current, version-specific docs directly to your agent.
  *
  * Context7 provides these tools:
- * - resolve-library-id: Converts library names to Context7-compatible IDs
+ * - resolve-library-id: Converts library names(eg. "react") to Context7-compatible IDs
  * - get-library-docs: Retrieves documentation with optional topic filtering
  *
  * Prerequisites:
@@ -18,11 +18,10 @@
  * - "How does MultiServerMCPClient differ from manually creating tools?"
  * - "Can I connect to multiple MCP servers simultaneously?"
  */
-
-import { ChatOpenAI } from "@langchain/openai";
 import { createAgent, HumanMessage } from "langchain";
 import "dotenv/config";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
+import { ChatGroq } from "@langchain/groq";
 
 async function main() {
   console.log("🔌 MCP Integration Demo - Context7 Documentation Server\n");
@@ -42,11 +41,14 @@ async function main() {
       url: MCP_SERVER_URL,
       // Optional: Add Context7 API key for higher rate limits
       // headers: {
-      //   "Authorization": `Bearer ${process.env.CONTEXT7_API_KEY}`
-      // }
+      //   Authorization: `Bearer ${process.env.CONTEXT7_API_KEY}`,
+      // },
     },
+    // tool2:{<config>}
   });
 
+  // enclosed whole process: fetching-tool -> model -> agent -> invoke
+  // necessary so that we can finally close mcpClient.close() either error occurs or not
   try {
     // 2. Get all available tools from Context7
     console.log("🔧 Fetching tools from Context7 MCP server...");
@@ -59,10 +61,9 @@ async function main() {
     console.log();
 
     // 3. Create model
-    const model = new ChatOpenAI({
-      model: process.env.AI_MODEL,
-      configuration: { baseURL: process.env.AI_ENDPOINT },
-      apiKey: process.env.AI_API_KEY,
+    const model = new ChatGroq({
+      model: "llama-3.3-70b-versatile",
+      apiKey: process.env.GROQ_API_KEY,
     });
 
     // 4. Create agent with MCP tools - uses same createAgent() pattern!
@@ -77,7 +78,7 @@ async function main() {
     console.log(`👤 User: ${query}\n`);
 
     const response = await agent.invoke({ messages: [new HumanMessage(query)] });
-    const lastMessage = response.messages[response.messages.length - 1];
+    const lastMessage = response.messages.at(-1)!;
 
     console.log(`🤖 Agent: ${lastMessage.content}\n`);
 
@@ -93,7 +94,7 @@ async function main() {
     console.error("❌ Error connecting to Context7 MCP server:", error);
   } finally {
     // Close the MCP client connection to allow the script to exit
-    await mcpClient.close();
+    // await mcpClient.close();
     console.log("\n✅ MCP client connection closed");
   }
 }

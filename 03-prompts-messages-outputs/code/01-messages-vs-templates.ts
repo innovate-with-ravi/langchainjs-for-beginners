@@ -4,13 +4,13 @@
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
  * - "When should I use messages vs templates in LangChain.js?"
- * - "How do agents use messages differently from RAG systems?"
+ * - {{"How do agents use messages differently from RAG systems?"}}
  */
 
 import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "langchain";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import "dotenv/config";
+import "dotenv/config"; // necessary to set configuration :{} in model
 
 async function main() {
   console.log("🎯 Messages vs Templates: Two Approaches\n");
@@ -43,9 +43,9 @@ async function main() {
   console.log("💡 Key points about messages:");
   console.log("   • Direct message construction - no template needed");
   console.log("   • Used by createAgent() in LangChain");
-  console.log("   • Great for dynamic, conversational flows");
+  console.log("   • Great for dynamic(varied prompts), conversational flows");
   console.log("   • Messages can include tool calls and results");
-  console.log("   • Ideal for agents with middleware");
+  console.log("   • Ideal for agents with {middleware}");
 
   // ==========================================
   // APPROACH 2: Templates (classic approach)
@@ -73,7 +73,7 @@ async function main() {
 
   console.log("💡 Key points about templates:");
   console.log("   • Reusable with variables");
-  console.log("   • Required by createStuffDocumentsChain() for RAG");
+  console.log("   • Required by {{createStuffDocumentsChain()}} for RAG");
   console.log("   • Great for consistent prompt structure");
   console.log("   • Pipes directly to models");
   console.log("   • Ideal for RAG and chain-based workflows");

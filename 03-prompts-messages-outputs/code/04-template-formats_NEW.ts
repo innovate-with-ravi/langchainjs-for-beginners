@@ -5,6 +5,8 @@
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
  * - "When should I use ChatPromptTemplate vs PromptTemplate?"
  * - "How does stringTemplate.format() differ from using pipe and invoke?"
+ * - "What is ChatPromptTemplate.fromTemplate() & how it works?"
+ * - "What is PromptTemplate.fromExamples() & how it works?"
  */
 
 import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
@@ -21,13 +23,26 @@ async function main() {
     apiKey: process.env.AI_API_KEY,
   });
 
-  // Format 1: ChatPromptTemplate (structured messages)
-  console.log("\n1️⃣  ChatPromptTemplate (Recommended for chat models):\n");
+  // Format 1: ChatPromptTemplate {{(structured messages)}}
+  console.log("\n1️⃣  ChatPromptTemplate {{(Recommended for chat models)}}:\n");
 
   const chatTemplate = ChatPromptTemplate.fromMessages([
     ["system", "You are a {role} who speaks in {style} style."],
     ["human", "{question}"],
   ]);
+
+  // fromTemplate() creates a chat template from a simple string
+  const template = ChatPromptTemplate.fromTemplate(
+    "You are a helpful assistant. Answer this: {question}"
+  );
+
+  const chain = template.pipe(model);
+
+  const result = await chain.invoke({
+    question: "What is TypeScript?",
+  });
+
+  console.log(result.content);
 
   const chain1 = chatTemplate.pipe(model);
 
@@ -80,6 +95,28 @@ async function main() {
   });
 
   console.log(result3.content);
+
+  // fromExamples() builds a few-shot prompt from examples
+  const examples = [
+    `input: "happy", output: "😊"`,
+    `input: "sad", output: "😢"`,
+    `input: "excited", output: "🎉"`,
+  ];
+
+  // Create template that includes the examples
+  const egTemplate = PromptTemplate.fromExamples(
+    examples,
+    "Translate the word {word} to an emoji." /*suffix*/,
+    ["word"],
+    "\n"
+  );
+
+  const egformattedPrompt = await egTemplate.format({ word: "angry" });
+  console.log("Formatted few-shot prompt:");
+  console.log(egformattedPrompt);
+
+  const egresult = await model.invoke(egformattedPrompt);
+  console.log("\nModel response:", egresult.content);
 
   console.log("\n" + "=".repeat(80));
   console.log("\n✅ Key Takeaways:");

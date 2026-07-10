@@ -3,12 +3,12 @@
  * Run: npx tsx 03-prompts-messages-outputs/code/07-structured-output.ts
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
- * - "How does withStructuredOutput() ensure the response matches the schema?"
+ * - "How does withStructuredOutput() ensure the response matches the schema?" -- my assumption (idk acutal anwer) is it simply modifies the prompt sent to model to say: hey, give the o/p acc. to given schema, rest is handled by zod's runtime validation
  * - "Can I make some Zod schema fields optional instead of required?"
  */
 
 import { ChatOpenAI } from "@langchain/openai";
-import * as z from "zod";
+import z from "zod";
 import "dotenv/config";
 
 async function main() {
@@ -22,16 +22,17 @@ async function main() {
 
   // Define the structure using Zod schema
   const PersonSchema = z.object({
-    name: z.string().describe("The person's full name"),
-    age: z.number().describe("The person's age in years"),
-    email: z.string().email().describe("The person's email address"),
-    occupation: z.string().describe("The person's job or profession"),
+    name: z.string(),
+    age: z.number().min(18, { message: "Person can't be a teen" }).optional(),
+    email: z.string().email().optional(),
+    occupation: z.string().nullable().optional(), // z.nullish()
   });
 
   // Create a model that returns structured output
   // strict: true ensures the model output exactly matches the schema (recommended)
   const structuredModel = model.withStructuredOutput(PersonSchema, {
     strict: true,
+    // includeRaw: true,
   });
 
   console.log("🧪 Testing with different inputs:\n");
@@ -81,3 +82,13 @@ async function main() {
 }
 
 main().catch(console.error);
+
+/*
+withStructuredOutput() is usually doing three things together:
+
+- It configures the model to produce output in a structured form, often as JSON matching a schema.
+
+- It uses the schema to guide the model’s response, so the output is more likely to follow the requested shape.
+
+- It parses and validates the result against your Zod schema at runtime.
+*/

@@ -3,8 +3,8 @@
  * Run: npx tsx 02-chat-models/code/05-error-handling.ts
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
- * - "How does withRetry() implement exponential backoff?"
- * - "Can I customize the retry delay and max attempts with withRetry()?"
+ * - {{"How does withRetry() implement exponential backoff?"}}
+ * - {{"Can I customize the retry delay and max attempts with withRetry()?"}}
  */
 
 import { ChatOpenAI } from "@langchain/openai";
@@ -16,16 +16,22 @@ let attemptCount = 0;
 /**
  * Makes an API call with automatic retry logic using LangChain's built-in withRetry()
  */
-async function robustCall(prompt: string, maxRetries = 3): Promise<string> {
+
+async function robustCall(
+  prompt: string,
+  maxRetries = 3
+): Promise<string> /*async functions can return only promise<type>*/ {
   const model = new ChatOpenAI({
     model: process.env.AI_MODEL,
     configuration: { baseURL: process.env.AI_ENDPOINT },
     apiKey: process.env.AI_API_KEY,
   });
 
-  // Use LangChain's built-in retry logic - automatically handles retries with exponential backoff
+  // Use LangChain's built-in retry logic - automatically handles retries with exponential backoff => automatically {{handles 429 errors}}
+
   const modelWithRetry = model.withRetry({
     stopAfterAttempt: maxRetries,
+    retryd
   });
 
   console.log(`🔄 Making call with automatic retry (max ${maxRetries} attempts)...`);
@@ -83,8 +89,9 @@ async function errorExamples() {
     // Simulate transient failure by temporarily breaking credentials
     const originalKey = process.env.AI_API_KEY;
 
-    // Override invoke to simulate transient failure
     const originalInvoke = model.invoke.bind(model);
+
+    // Override invoke to simulate transient failure
     (model as any).invoke = async function (input: any) {
       attemptCount++;
       console.log(`   🔄 Attempt ${attemptCount}...`);

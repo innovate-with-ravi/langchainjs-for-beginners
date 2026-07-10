@@ -9,6 +9,7 @@ import { createAgent, HumanMessage, AIMessage, tool } from "langchain";
 import * as z from "zod";
 import { evaluate } from "mathjs";
 import "dotenv/config";
+import { ChatGroq } from "@langchain/groq";
 
 // Tool 1: Search
 const searchTool = tool(
@@ -143,10 +144,9 @@ async function main() {
   console.log("=".repeat(80) + "\n");
 
   // Create the model
-  const model = new ChatOpenAI({
-    model: process.env.AI_MODEL,
-    configuration: { baseURL: process.env.AI_ENDPOINT },
-    apiKey: process.env.AI_API_KEY,
+  const model = new ChatGroq({
+    model: String(process.env.GROQ_AI_MODEL),
+    apiKey: process.env.GROQ_API_KEY,
   });
 
   // Create agent using createAgent() - handles multi-tool selection automatically
@@ -172,7 +172,7 @@ async function main() {
     const response = await agent.invoke({ messages: [new HumanMessage(query)] });
 
     // Get the final answer
-    const lastMessage = response.messages[response.messages.length - 1];
+    const lastMessage = response.messages.at(-1)!;
     console.log(`\n✅ Agent: ${lastMessage.content}\n`);
 
     // Analyze which tools were used

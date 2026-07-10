@@ -29,7 +29,7 @@ const calculatorTool = tool(
     schema: z.object({
       expression: z.string().describe("The mathematical expression to evaluate"),
     }),
-  },
+  }
 );
 
 // Tool 2: Weather
@@ -55,7 +55,7 @@ const weatherTool = tool(
     schema: z.object({
       city: z.string().describe("The name of the city to get weather for"),
     }),
-  },
+  }
 );
 
 // Tool 3: Search
@@ -63,9 +63,12 @@ const searchTool = tool(
   async (input) => {
     // Simulated search results
     const searchResults: Record<string, string> = {
-      "LangChain.js": "LangChain.js is a framework for building applications with large language models (LLMs). It provides tools, agents, chains, and memory systems to create sophisticated AI applications.",
-      TypeScript: "TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale.",
-      "JavaScript frameworks": "Popular JavaScript frameworks include React, Vue, Angular, Svelte, and Next.js for building modern web applications.",
+      "LangChain.js":
+        "LangChain.js is a framework for building applications with large language models (LLMs). It provides tools, agents, chains, and memory systems to create sophisticated AI applications.",
+      TypeScript:
+        "TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale.",
+      "JavaScript frameworks":
+        "Popular JavaScript frameworks include React, Vue, Angular, Svelte, and Next.js for building modern web applications.",
     };
 
     // Find best match (simplified)
@@ -86,7 +89,7 @@ const searchTool = tool(
     schema: z.object({
       query: z.string().describe("The search query"),
     }),
-  },
+  }
 );
 
 async function main() {
@@ -115,6 +118,9 @@ async function main() {
   for (const query of queries) {
     console.log(`👤 User: ${query}`);
     const response = await agent.invoke({ messages: [new HumanMessage(query)] });
+    // console.log("response.messages:", response.messages);
+    // maintains conversation history for current invocation only
+    console.log("response.messages.length:", response.messages.length);
     const lastMessage = response.messages[response.messages.length - 1];
     console.log(`🤖 Agent: ${lastMessage.content}\n`);
   }

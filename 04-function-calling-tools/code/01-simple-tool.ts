@@ -26,7 +26,7 @@ const calculatorTool = tool(
     }
   },
   {
-    name: "calculator",
+    name: "calculator", // LLM(s) refer to theइ tool by this name
     description:
       "Useful for performing mathematical calculations. Use this when you need to compute numbers.",
     schema: z.object({
@@ -41,16 +41,12 @@ async function main() {
 
   console.log("Tool Name:", calculatorTool.name);
   console.log("Description:", calculatorTool.description);
-  console.log("\nSchema:", JSON.stringify(calculatorTool.schema, null, 2));
+  console.log("\nSchema:", JSON.stringify(calculatorTool.schema /*python's schema*/, null, 2));
 
   console.log("\n" + "=".repeat(80) + "\n");
 
   // Test the tool directly
-  const testExpressions = [
-    "25 * 17",
-    "(100 + 50) / 2",
-    "sqrt(144)",
-  ];
+  const testExpressions = ["25 * 17", "(100 + 50) / 2", "sqrt(144)"];
 
   for (const expr of testExpressions) {
     console.log(`\nExpression: ${expr}`);
