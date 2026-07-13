@@ -44,6 +44,16 @@ mcpServer.setRequestHandler(ListToolsRequestSchema, async () => ({
       description: "Convert temperature between Celsius and Fahrenheit",
 
       inputSchema: {
+        /*
+        type:string, 
+
+        properties:{
+          param1:{type:"type", description},
+          param2:{type:"type", description},
+        }, 
+
+        required:["param1", "param2"]
+        */
         type: "object",
 
         properties: {
@@ -51,6 +61,7 @@ mcpServer.setRequestHandler(ListToolsRequestSchema, async () => ({
           from: { type: "string", enum: ["celsius", "fahrenheit"], description: "Source unit" },
           to: { type: "string", enum: ["celsius", "fahrenheit"], description: "Target unit" },
         },
+
         required: ["value", "from", "to"],
       },
     },
@@ -62,6 +73,7 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   if (name === "calculate") {
+    // function for calculate
     const { expression } = args as { expression: string };
 
     try {

@@ -40,9 +40,9 @@ async function main() {
       transport: "http",
       url: MCP_SERVER_URL,
       // Optional: Add Context7 API key for higher rate limits
-      // headers: {
-      //   Authorization: `Bearer ${process.env.CONTEXT7_API_KEY}`,
-      // },
+      headers: {
+        Authorization: `Bearer ${process.env.CONTEXT7_API_KEY}`,
+      },
     },
     // tool2:{<config>}
   });

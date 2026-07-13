@@ -18,7 +18,7 @@ import * as z from "zod";
 import "dotenv/config";
 
 console.log("🎛️  Chapter 6 Assignment Solution: Challenge 2");
-console.log("=" .repeat(60));
+console.log("=".repeat(60));
 console.log();
 
 // Custom calculator tool (not from MCP)
@@ -88,11 +88,7 @@ async function main() {
     });
 
     // Step 6: Test with different queries
-    const queries = [
-      "What is 125 * 8?",
-      "How do I use React hooks?",
-      "Calculate 50 + 25",
-    ];
+    const queries = ["What is 125 * 8?", "How do I use React hooks?", "Calculate 50 + 25"];
 
     for (const query of queries) {
       console.log(`👤 User: ${query}`);
@@ -123,7 +119,6 @@ async function main() {
     console.log("   This pattern lets you mix MCP tools (from external servers)");
     console.log("   with your own custom tools in a single agent!");
     console.log();
-
   } catch (error) {
     console.error("❌ Error:", error);
     throw error;

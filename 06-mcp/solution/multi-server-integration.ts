@@ -22,7 +22,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 console.log("🌐 Assignment Solution: Challenge 3");
-console.log("=" .repeat(60));
+console.log("=".repeat(60));
 console.log();
 
 async function main() {
@@ -48,24 +48,27 @@ async function main() {
   try {
     // Step 2: Get tools from ALL connected servers
     console.log("🔍 Fetching tools from all servers...\n");
-    const allTools = await mcpClient.getTools();
+
+    const context7Tools = await mcpClient.getTools(["context7"]);
+    const calcTools = await mcpClient.getTools(["calculator"]);
+    const allTools = [...context7Tools, ...calcTools];
 
     // Step 3: Display available tools organized by server
     console.log("📋 Available Tools:\n");
 
     // Context7 tools (documentation-related)
-    const context7Tools = allTools.filter(
-      (t) => t.name.includes("library") || t.name.includes("resolve")
-    );
+    // const context7Tools = allTools.filter(
+    //   (t) => t.name.includes("library") || t.name.includes("resolve")
+    // );
     console.log("   From context7:");
     context7Tools.forEach((tool) => {
       console.log(`   • ${tool.name}`);
     });
 
     // Calculator tools (math-related)
-    const calcTools = allTools.filter(
-      (t) => t.name === "calculate" || t.name === "convert_temperature"
-    );
+    // const calcTools = allTools.filter(
+    //   (t) => t.name === "calculate" || t.name === "convert_temperature"
+    // );
     console.log("\n   From calculator:");
     calcTools.forEach((tool) => {
       console.log(`   • ${tool.name}`);
@@ -74,7 +77,7 @@ async function main() {
 
     // Step 4: Create model
     const model = new ChatOpenAI({
-      model: process.env.AI_MODEL || "gpt-4o-mini",
+      model: "gpt-4o-mini",
       configuration: { baseURL: process.env.AI_ENDPOINT },
       apiKey: process.env.AI_API_KEY,
     });
@@ -158,7 +161,6 @@ async function main() {
     console.log("📖 MCP Registry:");
     console.log("   Find more MCP servers at: https://github.com/mcp");
     console.log();
-
   } catch (error) {
     console.error("❌ Error:", error);
     console.log();

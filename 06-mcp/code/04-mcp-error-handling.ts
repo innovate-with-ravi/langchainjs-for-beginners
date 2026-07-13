@@ -1,7 +1,7 @@
 /**
  * Chapter 6 Example 4: MCP Error Handling & Production Patterns
  *
- * This example shows production-ready patterns for handling MCP failures:
+ * This example shows production-ready patterns for {{handling MCP failures}}:
  * - Built-in retry logic with LangChain's withRetry()
  * - Connection errors and timeouts
  * - Graceful degradation
@@ -14,11 +14,11 @@
 
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import { ChatOpenAI } from "@langchain/openai";
-import { createAgent, HumanMessage } from "langchain";
+import { context, createAgent, HumanMessage } from "langchain";
 import "dotenv/config";
 
 // Utility: Safe MCP client creation with error handling
-async function createMCPClientSafely(config: any): Promise<MultiServerMCPClient | null> {
+export async function createMCPClientSafely(config: any): Promise<MultiServerMCPClient | null> {
   try {
     console.log("🔄 Attempting to connect to MCP server...");
     const client = new MultiServerMCPClient(config);
@@ -29,7 +29,10 @@ async function createMCPClientSafely(config: any): Promise<MultiServerMCPClient 
 
     return client;
   } catch (error) {
-    console.error("❌ Failed to connect to MCP server:", error instanceof Error ? error.message : error);
+    console.error(
+      "❌ Failed to connect to MCP server:",
+      error instanceof Error ? error.message : error
+    );
     return null;
   }
 }
@@ -37,7 +40,7 @@ async function createMCPClientSafely(config: any): Promise<MultiServerMCPClient 
 // Main execution
 console.log("🛡️  MCP Error Handling & Retry Patterns\n");
 
-// Pattern 1: Try primary server, fall back to alternative
+// Pattern 1: {{Try primary server, fall back to alternative}}
 console.log("Pattern 1: Primary + Fallback Strategy\n");
 
 let mcpClient: MultiServerMCPClient | null = null;
@@ -48,14 +51,20 @@ try {
   mcpClient = await createMCPClientSafely({
     context7: {
       transport: "http",
-      url: "https://mcp.context7.com/mcp"
-    }
+      url: "https://mcp.context7.com/mcp",
+    },
   });
 
   if (!mcpClient) {
     // If Context7 fails, you could fall back to alternative server
     console.log("\n📡 Primary failed, trying fallback server...");
     // This is where you'd try an alternative server
+    mcpClient = await createMCPClientSafely({
+      context7: {
+        transport: "http",
+        url: "https://mcp.context7.com/mcp",
+      },
+    });
     // For demo, we'll continue without fallback
     throw new Error("No MCP servers available");
   }
@@ -67,7 +76,7 @@ try {
     tools = await mcpClient!.getTools();
 
     console.log(`✅ Retrieved ${tools.length} tools successfully\n`);
-    tools.forEach(tool => {
+    tools.forEach((tool) => {
       console.log(`   • ${tool.name}`);
     });
   } catch (error) {
@@ -88,12 +97,12 @@ try {
   const baseModel = new ChatOpenAI({
     model: process.env.AI_MODEL,
     configuration: { baseURL: process.env.AI_ENDPOINT },
-    apiKey: process.env.AI_API_KEY
+    apiKey: process.env.AI_API_KEY,
   });
 
   // Use LangChain's built-in retry logic - automatically handles exponential backoff!
   const modelWithRetry = baseModel.withRetry({
-    stopAfterAttempt: 3  // Max 3 retry attempts
+    stopAfterAttempt: 3, // Max 3 retry attempts
   });
 
   console.log("✅ Model configured with automatic retry (max 3 attempts)");
@@ -101,8 +110,8 @@ try {
   console.log("   - No custom retry loops needed!");
 
   const agent = createAgent({
-    model: modelWithRetry,  // Use model with retry
-    tools  // May be empty array if MCP failed
+    model: modelWithRetry, // Use model with retry
+    tools, // May be empty array if MCP failed
   });
 
   // Pattern 3: Execute with timeout and error handling
@@ -112,21 +121,31 @@ try {
   console.log(`👤 User: ${query}`);
 
   try {
+    // "Is the error returned by timeoutPromise automatically thrown?
+    // Does the rejection of a promise throw an error?" ---> YES!
+
+    // Whenever you await a Promise that rejects, JavaScript automatically translates that rejection into a standard thrown error.
+
+    // This exact Promise.race pattern is the industry standard way to build timeouts in modern JavaScript without relying on external libraries!
+
     // Wrap agent execution with timeout
-    const timeoutMs = 30000;  // 30 second timeout
+    // don't wait more than timeoutMs ms
+    const timeoutMs = 30000; // 30 second timeout
+
     const responsePromise = agent.invoke({
-      messages: [new HumanMessage(query)]
+      messages: [new HumanMessage(query)],
     });
 
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("Query timeout")), timeoutMs)
     );
 
-    const response = await Promise.race([responsePromise, timeoutPromise]) as any;
+    // Creates a Promise that is resolved or rejected when any of the provided Promises are resolved or rejected.
+    // measns response is given when responsePromise is resolved & is rejected after timeoutMs when timeoutPromise is rejected
+    const response = (await Promise.race([responsePromise, timeoutPromise])) as any;
 
     const lastMessage = response.messages[response.messages.length - 1];
     console.log(`🤖 Agent: ${lastMessage.content}\n`);
-
   } catch (error) {
     console.error("❌ Query failed:", error instanceof Error ? error.message : error);
 
@@ -138,14 +157,17 @@ try {
   // Pattern 4: Health checks
   console.log("\nPattern 4: MCP Server Health Check\n");
 
+  // just fetch tools to check connection
   async function checkMCPHealth(client: MultiServerMCPClient): Promise<boolean> {
     try {
-      const tools = await Promise.race([
+      const tools = (await Promise.race([
         client.getTools(),
+
+        //  Does the rejection of a promise throw an error?" ---> YES!
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Health check timeout")), 5000)
-        )
-      ]) as any[];
+        ),
+      ])) as any[];
 
       const isHealthy = tools.length > 0;
       console.log(isHealthy ? "✅ MCP server is healthy" : "⚠️  MCP server returned no tools");
@@ -177,7 +199,6 @@ try {
   console.log("   □ Error logging/metrics");
   console.log("   □ Graceful degradation");
   console.log("   □ Circuit breaker pattern (for advanced use)");
-
 } catch (error) {
   console.error("\n❌ Critical error:", error);
   console.log("💡 In production, this would trigger alerts and fallback to cached data");

@@ -17,60 +17,63 @@ import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
   isInitializeRequest,
-  JSONRPCErrorResponse,
+  JSONRPCError,
 } from "@modelcontextprotocol/sdk/types.js";
 import { evaluate } from "mathjs";
 import express, { Request, Response } from "express";
 import { randomUUID } from "node:crypto";
 
-// Create MCP server with tools capability
-const mcpServer = new Server(
-  { name: "my-calculator", version: "1.0.0" },
-  { capabilities: { tools: {} } }
-);
+// 1. Create a {{Factory Function to stamp out new servers}}
+function createMcpServerInstance() {
+  const server = new Server(
+    { name: "my-calculator", version: "1.0.0" },
+    { capabilities: { tools: {} } }
+  );
 
-// Define available tools
-mcpServer.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [
-    {
-      name: "calculate",
-      description: "Perform mathematical calculations",
-      inputSchema: {
-        type: "object",
-        properties: {
-          expression: { type: "string", description: "Math expression to evaluate" },
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({
+    tools: [
+      {
+        name: "calculate",
+        description: "Perform mathematical calculations",
+        inputSchema: {
+          type: "object",
+          properties: {
+            expression: { type: "string", description: "Math expression to evaluate" },
+          },
+          required: ["expression"],
         },
-        required: ["expression"],
       },
-    },
-  ],
-}));
+    ],
+  }));
 
-// Handle tool execution
-mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name === "calculate") {
-    const { expression } = request.params.arguments as { expression: string };
-    try {
-      const result = evaluate(expression);
-      return { content: [{ type: "text", text: String(result) }] };
-    } catch (error) {
-      throw new Error(
-        `Invalid expression: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    if (request.params.name === "calculate") {
+      const { expression } = request.params.arguments as { expression: string };
+      try {
+        const result = evaluate(expression);
+        return { content: [{ type: "text", text: String(result) }] };
+      } catch (error) {
+        throw new Error(
+          `Invalid expression: ${error instanceof Error ? error.message : "Unknown error"}`
+        );
+      }
     }
-  }
-  throw new Error(`Unknown tool: ${request.params.name}`);
-});
+    throw new Error(`Unknown tool: ${request.params.name}`);
+  });
+
+  return server;
+}
 
 // StreamableHTTPServer class wrapper for session management
 class StreamableHTTPServer {
-  mcpServer: Server;
-  // Map to store transports by session ID (unique transport for each sessionId)
+  // Map to store transports by session ID (1 sessionId => 1 server)
   private transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
 
-  constructor(mcpServer: Server) {
-    this.mcpServer = mcpServer;
-  }
+  // Keep track of transports AND their dedicated servers
+  private activeServers: { [sessionId: string]: Server } = {}; // <-- ADD THIS
+
+  // Remove mcpServer from constructor, we don't need a global one anymore
+  constructor() {}
 
   // get request isn't allowed
   async handleGetRequest(req: Request, res: Response) {
@@ -91,9 +94,11 @@ class StreamableHTTPServer {
         // Reuse existing transport
         transport = this.transports[sessionId];
         console.log(`🔄 Reusing existing session: ${sessionId}`);
-      } else if (!sessionId && isInitializeRequest(req.body)) {
+      } else if (!sessionId && isInitializeRequest(req.body) /*it's an initialization request*/) {
         // New initialization request
         console.log("🆕 Creating new transport for new client...");
+
+        // now, we create a new mcp server for new client
         transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => randomUUID(),
 
@@ -102,14 +107,18 @@ class StreamableHTTPServer {
             this.transports[sessionId] = transport;
             console.log(`🆕 New session initialized: ${sessionId}`);
 
+            // 1. Generate a BRAND NEW brain just for this client
+            const clientServer = createMcpServerInstance();
+            this.activeServers[sessionId] = clientServer;
+
             // Connect this transport to the server (one-time setup per transport)
             try {
-              await this.mcpServer.connect(transport);
-              console.log(`🔗 Transport ${sessionId} connected to server`);
+              await clientServer.connect(transport);
+              console.log(`🔗 Transport ${sessionId} securely bound to new MCP instance`);
             } catch (connectError) {
               const msg =
                 connectError instanceof Error ? connectError.message : String(connectError);
-              console.error(`❌ Failed to connect transport ${sessionId}:`, msg);
+              console.error(`❌ Connection failed for ${sessionId}`, msg);
               // Continue anyway - handleRequest will try to process
             }
           },
@@ -118,8 +127,9 @@ class StreamableHTTPServer {
         // Clean up transport when closed
         transport.onclose = () => {
           if (transport.sessionId) {
+            delete this.activeServers[transport.sessionId];
             delete this.transports[transport.sessionId];
-            console.log(`🗑️ Session removed: ${transport.sessionId}`);
+            console.log(`🗑️ Session & Server removed: ${transport.sessionId}`);
           }
         };
 
@@ -171,6 +181,7 @@ class StreamableHTTPServer {
     try {
       transport.close();
       delete this.transports[sessionId];
+      delete this.activeServers[sessionId];
 
       res.status(200).send("Session terminated successfully");
       console.log(`🔒 Session ${sessionId} terminated successfully`);
@@ -193,11 +204,20 @@ class StreamableHTTPServer {
       }
     }
 
-    await this.mcpServer.close();
+    // Close all active servers
+    // await this.mcpServer.close();
+    for (const [sessionId, server] of Object.entries(this.activeServers)) {
+      try {
+        server.close();
+        console.log(`🗑️ Server closed for session ID: ${sessionId}`);
+      } catch (error) {
+        console.error("💥 Error closing Server:", error);
+      }
+    }
     console.log("👋 Server shutdown complete.");
   }
 
-  private createRPCErrorResponse(message: string): JSONRPCErrorResponse {
+  private createRPCErrorResponse(message: string): JSONRPCError {
     return {
       jsonrpc: "2.0",
 
@@ -212,7 +232,7 @@ class StreamableHTTPServer {
 }
 
 // Create StreamableHTTPServer instance
-const server = new StreamableHTTPServer(mcpServer);
+const server = new StreamableHTTPServer();
 
 // Express app setup
 const app = express();

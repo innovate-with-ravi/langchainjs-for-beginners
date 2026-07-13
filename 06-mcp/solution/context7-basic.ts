@@ -16,7 +16,7 @@ import { createAgent, HumanMessage } from "langchain";
 import "dotenv/config";
 
 console.log("🔧 Chapter 6 Assignment Solution: Challenge 1");
-console.log("=" .repeat(60));
+console.log("=".repeat(60));
 console.log();
 
 async function main() {
@@ -85,7 +85,6 @@ async function main() {
     console.log("   • Queried documentation seamlessly through the agent");
     console.log("   • Same agent pattern as Chapter 5, different tool source!");
     console.log();
-
   } catch (error) {
     console.error("❌ Error:", error);
     throw error;
