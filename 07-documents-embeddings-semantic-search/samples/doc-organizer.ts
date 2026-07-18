@@ -12,6 +12,7 @@ import "dotenv/config";
 const documents: Document[] = [
   new Document({
     pageContent: "Introduction to machine learning algorithms and supervised learning techniques.",
+
     metadata: {
       category: "AI",
       date: "2024-01-15",
@@ -21,6 +22,7 @@ const documents: Document[] = [
   }),
   new Document({
     pageContent: "Understanding neural networks and deep learning fundamentals for beginners.",
+
     metadata: {
       category: "AI",
       date: "2024-01-20",
@@ -57,6 +59,7 @@ const documents: Document[] = [
   }),
   new Document({
     pageContent: "Introduction to NoSQL databases: MongoDB, Cassandra, and Redis comparison.",
+
     metadata: {
       category: "Database",
       date: "2024-02-15",
@@ -136,7 +139,7 @@ function listAllDocuments() {
     console.log(`   🏷️  Tags: ${doc.metadata.tags.join(", ")}`);
   });
 
-  console.log("\n─".repeat(80));
+  console.log("\n" + "─".repeat(80));
   console.log(`Total Documents: ${documents.length}\n`);
 }
 
@@ -159,13 +162,14 @@ function filterByCategory(category: string) {
     console.log(`   ✍️  Author: ${doc.metadata.author}`);
   });
 
-  console.log("\n─".repeat(80));
+  console.log("\n" + "─".repeat(80));
   console.log(`Found ${filtered.length} documents\n`);
 }
 
 function filterByDateRange(startDate: string, endDate: string) {
   const filtered = documents.filter((doc) => {
     const docDate = doc.metadata.date;
+
     return docDate >= startDate && docDate <= endDate;
   });
 
@@ -184,7 +188,7 @@ function filterByDateRange(startDate: string, endDate: string) {
     console.log(`   ✍️  Author: ${doc.metadata.author}`);
   });
 
-  console.log("\n─".repeat(80));
+  console.log("\n" + "─".repeat(80));
   console.log(`Found ${filtered.length} documents\n`);
 }
 
@@ -207,7 +211,7 @@ function searchByTag(tag: string) {
     console.log(`   🏷️  Tags: ${doc.metadata.tags.join(", ")}`);
   });
 
-  console.log("\n─".repeat(80));
+  console.log("\n" + "─".repeat(80));
   console.log(`Found ${filtered.length} documents\n`);
 }
 
@@ -215,6 +219,7 @@ function sortDocuments(field: "date" | "category" | "author") {
   const sorted = [...documents].sort((a, b) => {
     const aValue = a.metadata[field];
     const bValue = b.metadata[field];
+
     return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
   });
 
@@ -228,7 +233,7 @@ function sortDocuments(field: "date" | "category" | "author") {
     );
   });
 
-  console.log("\n─".repeat(80) + "\n");
+  console.log("\n" + "─".repeat(80) + "\n");
 }
 
 const rl = readline.createInterface({

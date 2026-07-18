@@ -21,9 +21,11 @@ const sentences = [
   "Python is great for data science",
   "Machine learning uses Python often",
   "I enjoy coding web applications",
+
   "Dogs are loyal pets",
   "Cats are independent animals",
   "Pets bring joy to families",
+  
   "The weather is sunny today",
   "It's raining outside",
 ];

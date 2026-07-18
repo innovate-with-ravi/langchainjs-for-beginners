@@ -133,10 +133,7 @@ const searchDocumentsTool = tool(
       "Search the remote RAG knowledge base for information about LangChain.js, MCP, agents, and RAG patterns. Use this when you need specific technical information that's likely in the knowledge base. DO NOT use this for general knowledge questions.",
     schema: z.object({
       query: z.string().describe("The search query to find relevant information"),
-      k: z
-        .number()
-        .optional()
-        .describe("Number of documents to return (default: 2)"),
+      k: z.number().optional().describe("Number of documents to return (default: 2)"),
     }),
   }
 );
@@ -153,7 +150,7 @@ async function createRAGAgent() {
 
 async function main() {
   console.log("🤖 MCP RAG Agent - Using Remote RAG Service\n");
-  console.log("=" .repeat(70) + "\n");
+  console.log("=".repeat(70) + "\n");
 
   // Initialize MCP connection
   // The transport is returned but we don't need to manage it directly
@@ -163,9 +160,9 @@ async function main() {
   // Create agent
   const agent = await createRAGAgent();
 
-  console.log("=" .repeat(70));
+  console.log("=".repeat(70));
   console.log("\n💡 Watch how the agent decides when to search vs answer directly:\n");
-  console.log("=" .repeat(70) + "\n");
+  console.log("=".repeat(70) + "\n");
 
   // Test questions - mix of general knowledge and knowledge-base specific
   const questions = [
@@ -200,7 +197,7 @@ async function main() {
     }
   }
 
-  console.log("=" .repeat(70));
+  console.log("=".repeat(70));
   console.log("\n💡 Key Observations:\n");
   console.log("✓ Agent answers general knowledge directly (no MCP call)");
   console.log("✓ Agent uses MCP RAG server for knowledge base questions");
@@ -214,7 +211,7 @@ async function main() {
   console.log("✓ Version control (update knowledge base without changing agents)");
   console.log("✓ Security (control access to knowledge at server level)\n");
 
-  console.log("=" .repeat(70) + "\n");
+  console.log("=".repeat(70) + "\n");
 
   // Cleanup
   console.log("🛑 Shutting down...");

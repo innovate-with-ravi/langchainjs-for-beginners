@@ -26,7 +26,7 @@ async function main() {
   console.log("=".repeat(80) + "\n");
 
   const embeddings = new OpenAIEmbeddings({
-    model: process.env.AI_EMBEDDING_MODEL || "text-embedding-3-small",
+    model: process.env.AI_EMBEDDING_MODEL || "text-embedding-3-large",
     configuration: { baseURL: process.env.AI_ENDPOINT },
     apiKey: process.env.AI_API_KEY,
   });
@@ -57,7 +57,7 @@ async function main() {
     console.log(`🔍 Query: "${query}" (${desc})\n`);
     console.log("─".repeat(80));
 
-    const results = await vectorStore.similaritySearchWithScore(query, 3);
+    const results = await vectorStore.similaritySearchWithScore(query, 4);
 
     results.forEach(([doc, score], index) => {
       console.log(`\n${index + 1}. ${doc.pageContent}`);

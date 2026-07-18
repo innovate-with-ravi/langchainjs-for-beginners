@@ -37,9 +37,10 @@ async function main() {
   console.log("Creating embeddings for texts...\n");
 
   const allEmbeddings = await embeddings.embedDocuments(texts);
+  // const x = embeddings.embedQuery
 
   console.log(`✅ Created ${allEmbeddings.length} embeddings`);
-  console.log(`   Each embedding has ${allEmbeddings[0].length} dimensions\n`);
+  console.log(`   Each embedding has ${allEmbeddings[2].length} dimensions\n`);
 
   // Show first embedding details
   console.log("First embedding (first 10 values):");
@@ -56,8 +57,12 @@ async function main() {
     [2, 3, "Pizza vs Weather (both different from LangChain)"],
   ];
 
+  // batch processed embeddings
   pairs.forEach(([i, j, description]) => {
-    const similarity = cosineSimilarity(allEmbeddings[i as number], allEmbeddings[j as number]);
+    const u = allEmbeddings[i as number],
+      v = allEmbeddings[j as number];
+
+    const similarity = cosineSimilarity(u, v);
     console.log(`${description}:`);
     console.log(`   Score: ${similarity.toFixed(4)}`);
     console.log(`   Texts: "${texts[i as number]}" vs "${texts[j as number]}"\n`);

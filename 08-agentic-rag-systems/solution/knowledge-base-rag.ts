@@ -71,10 +71,7 @@ async function main() {
   console.log(`Creating vector store with ${knowledgeBase.length} documents...\n`);
 
   // 2. Create vector store
-  const vectorStore = await MemoryVectorStore.fromDocuments(
-    knowledgeBase,
-    embeddings
-  );
+  const vectorStore = await MemoryVectorStore.fromDocuments(knowledgeBase, embeddings);
 
   // 3. Create retrieval tool for the agent
   const searchKnowledgeBase = tool(
@@ -86,21 +83,14 @@ async function main() {
         return "No relevant information found in the knowledge base.";
       }
 
-      return results
-        .map(
-          (doc) =>
-            `[${doc.metadata.title}]: ${doc.pageContent}`
-        )
-        .join("\n\n");
+      return results.map((doc) => `[${doc.metadata.title}]: ${doc.pageContent}`).join("\n\n");
     },
     {
       name: "searchMyNotes",
       description:
         "Search my personal knowledge base for information about TypeScript, React, Docker, REST APIs, Git, Node.js, and databases. Use this when you need specific technical information from my notes.",
       schema: z.object({
-        query: z
-          .string()
-          .describe("The search query to find relevant information from my notes"),
+        query: z.string().describe("The search query to find relevant information from my notes"),
       }),
     }
   );

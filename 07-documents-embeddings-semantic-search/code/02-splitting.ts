@@ -7,7 +7,7 @@
  * - "Can I split on specific delimiters like headings or paragraphs?"
  */
 
-import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { RecursiveCharacterTextSplitter, MarkdownTextSplitter } from "@langchain/textsplitters";
 
 async function main() {
   console.log("✂️  Text Splitting Example\n");
@@ -48,13 +48,17 @@ with new architectures and techniques emerging regularly.
 
   console.log("Original text length:", longText.length, "characters\n");
 
+  // function to slplit for any chunk ${size}
   // Create splitter with specific configuration
   const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 300,
-    chunkOverlap: 50,
+    chunkSize: 300, // Target size in characters
+    chunkOverlap: 50, // Overlap between chunks (preserves context i.e. keep last-chunk's 50 chars in curr chunk)
+
+    // separators: ["\n#", "\n##", "\n###", "\n####", "\n#####", "\n\n", "\n", " "], // Custom delimiter hierarchy
   });
 
   const docs = await splitter.createDocuments([longText]);
+  console.log("docs:", JSON.stringify(docs, null, 2));
 
   console.log(`✂️  Split into ${docs.length} chunks\n`);
   console.log("=".repeat(80));
@@ -76,3 +80,23 @@ with new architectures and techniques emerging regularly.
 }
 
 main().catch(console.error);
+
+/*
+Practical Chunk Size Guidelines
+Starting Point: Use 500 characters with 100 character overlap (20%) for most use cases.
+
+Adjust based on results of docs-retrieval:
+
+Too few results → Increase chunk size
+Results too generic → Decrease chunk size
+Missing context at boundaries → Increase overlap
+*/
+// "Too few results" means your Vector Database is failing to find enough relevant text blocks that mathematically match the user's question.
+
+/*
+By default, the RecursiveCharacterTextSplitter attempts to split text using a predefined hierarchy of separators. It tries to split on double newlines (paragraphs) first, then single newlines (sentences), then spaces (words), and finally individual characters.
+
+If you want to explicitly control this behavior to split only on {{specific markdown headings or custom delimiters}}, you can pass a separators array into the configuration object alongside chunkSize and chunkOverlap:  
+*/
+
+// LangChain also offers specialized splitters out of the box, such as the MarkdownTextSplitter or HTMLTextSplitter, which are hardcoded to split cleanly on structural tags like <h2> or ### rather than blindly counting characters.

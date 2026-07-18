@@ -4,6 +4,8 @@
  * Run: npx tsx 07-documents-embeddings-semantic-search/samples/smart-chunker.ts
  */
 
+// ask ai to explain smartChunking in brief
+
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { Document } from "@langchain/core/documents";
 import "dotenv/config";
@@ -74,6 +76,7 @@ LangChain's agent framework provides the building blocks needed to create intell
 
 interface SmartChunk {
   content: string;
+
   metadata: {
     section: string;
     subsection?: string;
@@ -97,6 +100,7 @@ function parseStructure(content: string): SmartChunk[] {
     if (currentContent.length > 0) {
       chunks.push({
         content: currentContent.join("\n").trim(),
+
         metadata: {
           section: currentSection,
           subsection: currentSubsection || undefined,
@@ -105,6 +109,8 @@ function parseStructure(content: string): SmartChunk[] {
           chunkIndex: chunkIndex++,
         },
       });
+
+      // reset currentContent
       currentContent = [];
     }
   }
@@ -112,13 +118,13 @@ function parseStructure(content: string): SmartChunk[] {
   for (const line of lines) {
     // Detect headers
     if (line.startsWith("# ")) {
-      saveChunk(1);
+      saveChunk(1); // saves the last content (heading to ...)
       currentSection = line.substring(2).trim();
       currentSubsection = "";
       currentSubsubsection = "";
       currentContent.push(line);
     } else if (line.startsWith("## ")) {
-      saveChunk(2);
+      saveChunk(2); // saves the last content (subHeading to ...)
       currentSubsection = line.substring(3).trim();
       currentSubsubsection = "";
       currentContent.push(line);
@@ -166,7 +172,7 @@ async function naiveChunking(content: string) {
   return chunks;
 }
 
-function smartChunking(content: string): SmartChunk[] {
+export function smartChunking(content: string): SmartChunk[] {
   console.log("\n🧠 Smart Structure-Based Chunking");
   console.log("─".repeat(80));
 
@@ -175,7 +181,7 @@ function smartChunking(content: string): SmartChunk[] {
   console.log(`Total chunks: ${chunks.length}\n`);
 
   // Show first 3 chunks with metadata
-  chunks.slice(0, 3).forEach((chunk, index) => {
+  chunks.slice(0, 5).forEach((chunk, index) => {
     console.log(`Chunk ${index + 1}:`);
     console.log(`  Section: ${chunk.metadata.section}`);
     if (chunk.metadata.subsection) {
@@ -227,16 +233,16 @@ async function main() {
   console.log(`  ✅ Respects document structure (${smartChunks.length} chunks)`);
   console.log(`  ✅ Keeps related content together`);
   console.log(`  ✅ Rich metadata for filtering`);
-  console.log(`  ✅ Better for hierarchical documents`);
+  console.log(`  ✅ Better for hierarchical documents eg: .md file`);
   console.log(`  💡 Each chunk knows its section context\n`);
 
   // Demonstrate metadata usage
   console.log("─".repeat(80) + "\n");
   console.log("🏷️  Metadata Benefits Example:\n");
 
-  const chapter2Chunks = smartChunks.filter(
-    (chunk) => chunk.metadata.section === "Chapter 2: Getting Started"
-  );
+  const chapter2Chunks = smartChunks.filter((chunk) => {
+    return chunk.metadata.subsection === "Chapter 2: Getting Started";
+  });
 
   console.log(`Can easily filter to "Chapter 2: Getting Started": ${chapter2Chunks.length} chunks`);
 

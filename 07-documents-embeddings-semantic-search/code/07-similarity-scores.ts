@@ -51,15 +51,16 @@ async function main() {
 
   console.log(`📚 Creating vector store with ${docs.length} documents...\n`);
 
-  const vectorStore = await MemoryVectorStore.fromDocuments(docs, embeddings);
+  const vectorStore = new MemoryVectorStore(embeddings);
+  await vectorStore.addDocuments(docs);
 
   console.log("✅ Vector store created!\n");
   console.log("=".repeat(80));
 
   // Search with scores
   const queries = [
-    "programming languages for web development",
-    "pets that are good for apartments",
+    "programming languages for web development(html, css, javascript, typescript etc)",
+    "pets that are good for apartments & need less attention",
     "understanding data with AI",
   ];
 

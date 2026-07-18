@@ -79,7 +79,10 @@ async function testChunking(config: ChunkConfig) {
   const chunks = await splitter.createDocuments([longDocument]);
 
   // Calculate statistics
-  const totalChars = chunks.reduce((sum, chunk) => sum + chunk.pageContent.length, 0);
+  const totalChars /*totalChars in all chunks*/ = chunks.reduce(
+    (sum, chunk) => sum + chunk.pageContent.length,
+    0
+  );
   const avgChunkSize = Math.round(totalChars / chunks.length);
   const minChunkSize = Math.min(...chunks.map((c) => c.pageContent.length));
   const maxChunkSize = Math.max(...chunks.map((c) => c.pageContent.length));
@@ -95,10 +98,12 @@ async function testChunking(config: ChunkConfig) {
   console.log(`  Range: ${minChunkSize} - ${maxChunkSize} characters\n`);
 
   console.log(`First Chunk Preview:`);
-  console.log(`  "${chunks[0].pageContent.substring(0, 100)}..."\n`);
+  console.log(`  "${chunks[0].pageContent.substring(0, 170)}..."\n`);
+  console.log(`Second Chunk Preview:`);
+  console.log(`  "${chunks[1].pageContent.substring(0, 170)}..."\n`);
 
   console.log(`Last Chunk Preview:`);
-  console.log(`  "${chunks[chunks.length - 1].pageContent.substring(0, 100)}..."\n`);
+  console.log(`  "${chunks[chunks.length - 1].pageContent.substring(0, 170)}..."\n`);
 
   console.log(`Best For: ${config.useCase}\n`);
 
@@ -160,7 +165,7 @@ async function main() {
   console.log("  ✅ Maximum context preservation");
   console.log("  ✅ Fewer chunks = faster processing");
   console.log("  ✅ Lower costs (fewer embeddings)");
-  console.log("  ❌ May include irrelevant information");
+  console.log("  ❌ May include {{irrelevant information}} for a specific question");
 
   console.log("\n" + "=".repeat(80));
   console.log("\n✅ Chunking experiment complete!");

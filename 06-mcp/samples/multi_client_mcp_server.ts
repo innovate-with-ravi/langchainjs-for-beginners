@@ -87,6 +87,7 @@ class StreamableHTTPServer {
     try {
       // Check for existing session ID
       const sessionId = req.headers["mcp-session-id"] as string | undefined;
+
       let transport: StreamableHTTPServerTransport;
       console.log(`📍 Session ID from header: ${sessionId || "none"}`);
 
@@ -166,7 +167,7 @@ class StreamableHTTPServer {
     }
   }
 
-  // Handle DELETE requests for session termination
+  // Handle DELETE requests for session termination (session Close/delete)
   async handleDeleteRequest(req: Request, res: Response) {
     const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
@@ -191,6 +192,7 @@ class StreamableHTTPServer {
     }
   }
 
+  // close the StreamableHTTPServer instance
   async close() {
     console.log("🛑 Shutting down server...");
 
@@ -205,7 +207,6 @@ class StreamableHTTPServer {
     }
 
     // Close all active servers
-    // await this.mcpServer.close();
     for (const [sessionId, server] of Object.entries(this.activeServers)) {
       try {
         server.close();
@@ -231,7 +232,7 @@ class StreamableHTTPServer {
   }
 }
 
-// Create StreamableHTTPServer instance
+// Create StreamableHTTPServer instance (single StreamableHTTPServer handles 1(mcpServer)to1(mcpClient) i.e. create mcpServer for each session)
 const server = new StreamableHTTPServer();
 
 // Express app setup

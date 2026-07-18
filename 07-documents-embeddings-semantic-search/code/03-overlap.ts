@@ -13,13 +13,10 @@ async function main() {
   console.log("🔄 Chunk Overlap Comparison\n");
 
   const text = `
-The mitochondria is often called the powerhouse of the cell. This organelle
-is responsible for producing ATP, the energy currency that powers cellular
-processes. Mitochondria have their own DNA, separate from the cell's nuclear
-DNA, which supports the theory that they were once independent organisms.
-Through a process called cellular respiration, mitochondria convert nutrients
-into usable energy. This process involves several complex steps including
-glycolysis, the Krebs cycle, and the electron transport chain.
+The mitochondria is often called the powerhouse of the cell. This organelle is responsible for producing ATP, the energy currency that powers cellular processes. 
+Mitochondria have their own DNA, separate from the cell's nuclear DNA, which supports the theory that they were once independent organisms.
+Through a process called cellular respiration, mitochondria convert nutrients into usable energy. 
+This process involves several complex steps including glycolysis, the Krebs cycle, and the electron transport chain.
 `.trim();
 
   console.log("Original text:");

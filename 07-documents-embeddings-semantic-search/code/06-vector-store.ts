@@ -3,8 +3,8 @@
  * Run: npx tsx 07-documents-embeddings-semantic-search/code/06-vector-store.ts
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
- * - "What's the difference between MemoryVectorStore and persistent stores like Pinecone?"
- * - "Can I save and load a MemoryVectorStore to avoid recomputing embeddings?"
+ * - "What's the difference between MemoryVectorStore(RAM till pgm life) and persistent stores like Pinecone?"
+ * - "Can I save and load a MemoryVectorStore to avoid recomputing embeddings?" -- NO, use pinecone
  */
 
 import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
@@ -61,7 +61,7 @@ async function main() {
 
   // Perform semantic searches
   const searches = [
-    { query: "programming languages for AI", k: 2 },
+    { query: "programming languages for AI", k /*no. of top-results*/: 2 },
     { query: "pets that need exercise", k: 2 },
     { query: "building websites", k: 2 },
     { query: "understanding data patterns", k: 2 },
@@ -84,8 +84,9 @@ async function main() {
   console.log("=".repeat(80));
   console.log("\n📊 Search with Similarity Scores:\n");
 
-  const query = "animals that make good house pets";
+  const query = "animals that become good house pets";
   const resultsWithScores = await vectorStore.similaritySearchWithScore(query, 4);
+  // console.log("resultsWithScores:", resultsWithScores);
 
   console.log(`Query: "${query}"\n`);
 
@@ -101,3 +102,7 @@ async function main() {
 }
 
 main().catch(console.error);
+
+/*
+A MemoryVectorStore holds all your embeddings entirely in your computer's RAM. The second you press CTRL+C or your server crashes, the data vanishes completely. Persistent stores like Pinecone save the vectors to a database (disk or cloud), meaning your data survives reboots, can be queried by multiple different microservices simultaneously, and handles millions of records without overflowing your server's memory.
+*/

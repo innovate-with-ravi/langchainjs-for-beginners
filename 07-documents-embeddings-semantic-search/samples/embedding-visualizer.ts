@@ -99,9 +99,14 @@ async function main() {
     y: reduced2D[index][1],
   }));
 
+  let tsv = ``;
+  tsv += visualizationData.map((data) => `${data.x}\t${data.y}` + "\n");
+
   // Save to JSON
   const outputPath = "./data/embeddings-2d.json";
   writeFileSync(outputPath, JSON.stringify(visualizationData, null, 2));
+
+  writeFileSync("./data/embeddings-2d.tsv", tsv);
 
   console.log(`💾 Saved visualization data to: ${outputPath}\n`);
 
@@ -113,6 +118,7 @@ async function main() {
 
   categories.forEach((category) => {
     console.log(`${category}:`);
+
     visualizationData
       .filter((d) => d.category === category)
       .forEach((d) => {

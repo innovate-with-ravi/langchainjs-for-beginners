@@ -8,7 +8,7 @@
  * agentic RAG gives your AI autonomy to determine whether retrieval is necessary.
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
- * - "How does the agent decide when to use the retrieval tool vs answering directly?"
+ * - "How does the agent decide when to use the retrieval tool vs answering directly?" -- my assumption: maybe the llm learns about retrieval tool from its description & schema etc..
  * - "How would I add metadata filtering to the retrieval tool?"
  */
 
@@ -69,19 +69,17 @@ async function main() {
   const retrievalTool = tool(
     async (input) => {
       console.log(`   🔍 Agent is searching for: "${input.query}"`);
+
       const results = await vectorStore.similaritySearch(input.query, 2);
-      return results
-        .map((doc) => `[${doc.metadata.source}]: ${doc.pageContent}`)
-        .join("\n\n");
+      return results.map((doc) => `[${doc.metadata.source}]: ${doc.pageContent}`).join("\n\n");
     },
     {
       name: "searchLangChainDocs",
       description:
         "Search LangChain documentation for specific information about LangChain.js, RAG systems, vector stores, and document processing. Use this when you need factual information from the LangChain knowledge base.",
+
       schema: z.object({
-        query: z
-          .string()
-          .describe("The search query to find relevant LangChain documentation"),
+        query: z.string().describe("The search query to find relevant LangChain documentation"),
       }),
     }
   );

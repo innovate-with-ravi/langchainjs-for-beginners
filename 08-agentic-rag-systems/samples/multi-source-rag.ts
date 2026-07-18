@@ -103,10 +103,14 @@ Content: ${doc.pageContent}`
     }
   );
 
+  // first find all results form vector store
+  // then filter source_type == text results
   const searchTextFiles = tool(
     async (input) => {
       const allResults = await vectorStore.similaritySearch(input.query, 10);
+
       const filtered = allResults.filter((doc) => doc.metadata.source_type === "text");
+
       return filtered
         .slice(0, 3)
         .map(
@@ -129,6 +133,7 @@ Content: ${doc.pageContent}`
   const searchMarkdownDocs = tool(
     async (input) => {
       const allResults = await vectorStore.similaritySearch(input.query, 10);
+
       const filtered = allResults.filter((doc) => doc.metadata.source_type === "markdown");
       return filtered
         .slice(0, 3)

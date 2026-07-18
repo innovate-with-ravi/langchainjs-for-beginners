@@ -15,7 +15,7 @@
  * Problem: Searches even for "What is 2+2?" - wasting time and money!
  *
  * 🤖 Try asking GitHub Copilot Chat (https://github.com/features/copilot):
- * - "Why does traditional RAG search for every query?"
+ * - "Why does traditional RAG search for every query?" -- because we didn't provide a retrieval tool rather we made a createRetrievalChain chain which always first searches then send context + question (combineDocsChain) to llm
  * - "What are the cost implications of always searching?"
  */
 
@@ -73,7 +73,7 @@ async function main() {
   const vectorStore = await MemoryVectorStore.fromDocuments(docs, embeddings);
   const retriever = vectorStore.asRetriever({ k: 2 });
 
-  // Create RAG prompt
+  // Create RAG prompt which is sent to llm on each query
   const prompt = ChatPromptTemplate.fromTemplate(`
 Answer the question based on the following context:
 
@@ -85,9 +85,11 @@ Answer: Provide a clear answer. If the question can be answered without the cont
 `);
 
   // Create traditional RAG chain - ALWAYS searches!
+
+  // stuffs prompt with retrieved docs({context})
   const combineDocsChain = await createStuffDocumentsChain({
     llm: model,
-    prompt,
+    prompt, // docs = {context}
   });
 
   const ragChain = await createRetrievalChain({
@@ -99,9 +101,9 @@ Answer: Provide a clear answer. If the question can be answered without the cont
 
   // Mix of questions - general knowledge AND document-specific
   const questions = [
-    "What is the capital of France?",         // General knowledge - doesn't need search!
-    "When was LangChain.js released?",        // Document-specific - needs search
-    "What is RAG and why is it useful?",      // Document-specific - needs search
+    "What is the capital of France?", // General knowledge - doesn't need search!
+    "When was LangChain.js released?", // Document-specific - needs search
+    "What is RAG and why is it useful?", // Document-specific - needs search
   ];
 
   for (const question of questions) {

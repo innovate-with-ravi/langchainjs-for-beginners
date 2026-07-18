@@ -13,11 +13,12 @@ import { writeFileSync, mkdirSync } from "fs";
 async function main() {
   console.log("📄 Loading Text Files Example\n");
 
-  // Create data directory if it doesn't exist
+  // Create data directory(./data) if it doesn't exist
   try {
     mkdirSync("./data", { recursive: true });
   } catch (e) {
     // Directory already exists
+    console.error(`directory already exists: ${(e as Error).message}`);
   }
 
   // Create sample text file
@@ -50,7 +51,8 @@ building AI-powered applications with just a few lines of code.
 
   // Load the document
   const loader = new TextLoader("./data/sample.txt");
-  const docs = await loader.load();
+  const docs = await loader.load(); //returns a Document object for eachpage
+  console.log("docs:", JSON.stringify(docs, null, 2));
 
   console.log(`📚 Loaded ${docs.length} document(s)\n`);
 

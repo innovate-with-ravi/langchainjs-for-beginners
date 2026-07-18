@@ -1,5 +1,5 @@
 /**
- * MCP RAG Server - HTTP Streamable MCP Server
+ * MCP RAG Server - ~HTTP Streamable MCP Server~ STDIO server
  * Run: npx tsx 07-agentic-rag-systems/samples/mcp-rag-server/mcp-rag-server.ts
  *
  * This example demonstrates building an HTTP streamable MCP server that exposes
@@ -31,10 +31,7 @@
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
 import { Document } from "@langchain/core/documents";
@@ -56,6 +53,7 @@ async function initializeVectorStore(): Promise<MemoryVectorStore> {
   // NOTE: Using MemoryVectorStore for educational simplicity
   // For production, use persistent storage like Pinecone, Chroma, or Weaviate
   // to preserve data across server restarts
+
   const initialDocs = [
     new Document({
       pageContent:
@@ -106,6 +104,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         name: "searchDocuments",
         description:
           "Search the knowledge base for relevant documents. Use this when you need specific information from the knowledge base. Returns the most relevant documents based on semantic similarity.",
+
         inputSchema: {
           type: "object",
           properties: {
@@ -277,7 +276,7 @@ Content: ${doc.pageContent}
 // Start the server
 async function main() {
   console.log("🤖 MCP RAG Server - Exposing RAG as a Service\n");
-  console.log("=" .repeat(70) + "\n");
+  console.log("=".repeat(70) + "\n");
 
   // Initialize vector store BEFORE starting server
   // This ensures tools can't be called before data is ready
@@ -292,7 +291,7 @@ async function main() {
   console.log("✅ MCP Server initialized and ready for connections\n");
   console.log("💡 Run the agent client to connect:\n");
   console.log("   npx tsx 07-agentic-rag-systems/samples/mcp-rag-server/mcp-rag-agent.ts\n");
-  console.log("=" .repeat(70) + "\n");
+  console.log("=".repeat(70) + "\n");
 
   // Handle graceful shutdown
   process.on("SIGINT", async () => {

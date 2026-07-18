@@ -1,6 +1,7 @@
 /**
  * Embedding Relationships - Vector Math Demo
  *
+ * {{embeddings encode relationships as vectors}}
  * This example demonstrates how embeddings capture semantic relationships
  * that can be manipulated through vector arithmetic.
  *
@@ -40,7 +41,7 @@ async function main() {
 
   // Initialize embeddings model
   const embeddings = new OpenAIEmbeddings({
-    model: process.env.AI_EMBEDDING_MODEL || "text-embedding-3-small",
+    model: "text-embedding-3-large",
     configuration: { baseURL: process.env.AI_ENDPOINT },
     apiKey: process.env.AI_API_KEY,
   });
@@ -62,6 +63,12 @@ async function main() {
     embeddings.embedQuery("Cat"),
     embeddings.embedQuery("Kitten"),
   ]);
+  // const [puppyEmbed, dogEmbed, catEmbed, kittenEmbed] = await embeddings.embedDocuments([
+  //   "Puppy",
+  //   "Dog",
+  //   "Cat",
+  //   "Kitten",
+  // ]);
 
   // Perform vector arithmetic: Puppy - Dog + Cat
   const puppyMinusDog = subtractVectors(puppyEmbed, dogEmbed);

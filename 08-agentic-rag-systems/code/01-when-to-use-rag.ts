@@ -155,10 +155,8 @@ A: We accept all major credit cards, PayPal, and Apple Pay.
   // Create retrieval tool from vector store
   const retrievalTool = tool(
     async (input) => {
-      const results = await vectorStore.similaritySearch(input.query, 2);
-      return results
-        .map((doc, i) => `[${doc.metadata.source}]: ${doc.pageContent}`)
-        .join("\n\n");
+      const results = await vectorStore.similaritySearch(input.query, 3);
+      return results.map((doc, i) => `[${doc.metadata.source}]: ${doc.pageContent}`).join("\n\n");
     },
     {
       name: "searchDocs",

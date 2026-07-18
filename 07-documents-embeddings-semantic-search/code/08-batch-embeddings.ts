@@ -42,7 +42,7 @@ async function main() {
     individualEmbeddings.push(embedding);
   }
 
-  console.timeEnd("Individual embeddings");
+  console.timeEnd("Individual embeddings"); // display the time elapsed b/w time(x) & timeEnd(x)
   console.log(`   Created ${individualEmbeddings.length} embeddings\n`);
 
   // Method 2: Batch embeddings (faster!)
